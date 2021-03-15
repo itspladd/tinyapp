@@ -29,7 +29,9 @@ app.get('/urls', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
-  console.log(req.body.longURL);
+  const random = Math.ceil(Math.random() * 1000);
+  urlDatabase.data[random] = req.body.longURL; 
+  console.log(urlDatabase);
 })
 
 app.get('/urls/new', (req, res) => {
