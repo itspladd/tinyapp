@@ -7,11 +7,14 @@
   <%- include('../partials/header') %>
   <%= greeting %>
   <ul>
-    <% for (const key of Object.keys(data)) { %>
+    <% for (const key in urls) { %>
       <li>
-        <a href=<%= data[key] %> ><%= key %></a>
+        <a href=<%= urls[key] %> ><%= key %></a>: redirects to <a href=<%= urls[key] %>><%= urls[key] %></a
       </li>
     <% } %>
+      <li>
+        <a href='#'>Add a new short URL!</a>
+      </li>
   </ul>
 </body>
 

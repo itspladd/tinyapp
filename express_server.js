@@ -18,9 +18,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  res.render('pages/urls_index', { 
-    data: urlDatabase.data,
-    greeting: urlDatabase.greeting });
+  const templateVars = {
+    urls: urlDatabase.data,
+    greeting: urlDatabase.greeting
+  }
+  res.render('pages/urls_index', templateVars);
 });
 
 app.get('/about', (req,res) => {
