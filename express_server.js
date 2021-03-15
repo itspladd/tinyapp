@@ -11,7 +11,15 @@ const urlDatabase = {
 };
 
 app.get('/', (req, res) => {
-  res.send('Bloop!');
+  res.render('pages/index');
+});
+
+app.get('/urls', (req, res) => {
+  res.render('pages/urls');
+});
+
+app.get('/about', (req,res) => {
+  res.render('pages/about');
 });
 
 app.get('/urls.json', (req, res) => {
