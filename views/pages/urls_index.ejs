@@ -5,17 +5,26 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-  <%= greeting %>
-  <ul>
-    <% for (const key in urls) { %>
-      <li>
-        <a href="/urls/<%= key %>"" ><%= key %></a>: redirects to <a href=<%= urls[key] %>><%= urls[key] %></a
-      </li>
-    <% } %>
-      <li>
-        <a href='#'>Add a new short URL!</a>
-      </li>
-  </ul>
+  <main style="margin: 1em">
+    <h3><%= greeting %></h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">TinyApp URL</th>
+          <th scope="col">Long URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const key in urls) { %>
+          <tr>
+            <td><a href="/urls/<%= key %>"><%= key %></a></td>
+            <td><a href=<%= urls[key] %>><%= urls[key] %></a></td>
+          </tr>
+        <% } %>
+      </tbody>
+      <td></td>
+      </table>
+  </main>
 </body>
 
 <%- include('../partials/footer') %>
