@@ -21,8 +21,16 @@ app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase.data,
     greeting: urlDatabase.greeting
-  }
+  };
   res.render('pages/urls_index', templateVars);
+});
+
+app.get('/urls/:shortURL', (req, res) => {
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase.data[req.params.shortURL],
+  };
+  res.render('pages/urls_show', templateVars);
 });
 
 app.get('/about', (req,res) => {
