@@ -9,8 +9,7 @@ const urlDatabase = {
   data: { 
     'abcdef': 'http://www.lighthouselabs.ca',
     'ghijkl': 'http://www.google.com',
-  },
-  greeting: 'Here are your URLs!'
+  }
 };
 
 app.get('/', (req, res) => {
@@ -20,7 +19,7 @@ app.get('/', (req, res) => {
 app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase.data,
-    greeting: urlDatabase.greeting
+    greeting: 'My URLs:'
   };
   res.render('pages/urls_index', templateVars);
 });
