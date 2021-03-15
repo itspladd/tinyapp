@@ -1,9 +1,13 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 const PORT = 8080;
 
 // Our view engine is EJS
 app.set('view engine', 'ejs');
+
+// Body parser
+app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   data: { 
@@ -22,6 +26,14 @@ app.get('/urls', (req, res) => {
     greeting: 'My URLs:'
   };
   res.render('pages/urls_index', templateVars);
+});
+
+app.post('/urls', (req, res) => {
+  console.log(req.body.longURL);
+})
+
+app.get('/urls/new', (req, res) => {
+  res.render('pages/urls_new');
 });
 
 app.get('/urls/:shortURL', (req, res) => {
