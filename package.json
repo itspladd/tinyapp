@@ -1,0 +1,20 @@
+{
+  "name": "tinyapp",
+  "version": "1.0.0",
+  "description": "A small URL shortening web app, built as part of my education at Lighthouse Labs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itspladd/tinyapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/itspladd/tinyapp/issues"
+  },
+  "homepage": "https://github.com/itspladd/tinyapp#readme"
+}
