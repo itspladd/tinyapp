@@ -30,8 +30,7 @@ app.get('/urls', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const random = Math.ceil(Math.random() * 1000);
-  urlDatabase.data[random] = req.body.longURL; 
-  console.log(urlDatabase);
+  urlDatabase.data[randomString()] = req.body.longURL; 
 })
 
 app.get('/urls/new', (req, res) => {
@@ -61,3 +60,20 @@ app.get('/howdy', (req, res) => {
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}`);
 });
+
+const randomString = () => {
+  let str = "";
+
+  while (str.length < 6) {
+    code = randInt(48, 90);
+    if (!(code > 57 && code < 65)) {
+      str += String.fromCharCode(code);
+    }
+  }
+
+  return str;
+}
+
+const randInt = (min, max) => {
+  return Math.floor((Math.random() * (max-min))) + min;
+}
