@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 
+// Our view engine is EJS
+app.set('view engine', 'ejs');
+
 const urlDatabase = {
   'abcdef': 'http://www.lighthouselabs.ca',
   'ghijkl': 'http://www.google.com',
