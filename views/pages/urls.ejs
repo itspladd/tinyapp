@@ -5,6 +5,14 @@
 </head>
 <body>
   <%- include('../partials/header') %>
+  <%= greeting %>
+  <ul>
+    <% for (const key of Object.keys(data)) { %>
+      <li>
+        <a href=<%= data[key] %> ><%= key %></a>
+      </li>
+    <% } %>
+  </ul>
 </body>
 
 <%- include('../partials/footer') %>

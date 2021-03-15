@@ -6,8 +6,11 @@ const PORT = 8080;
 app.set('view engine', 'ejs');
 
 const urlDatabase = {
-  'abcdef': 'http://www.lighthouselabs.ca',
-  'ghijkl': 'http://www.google.com',
+  data: { 
+    'abcdef': 'http://www.lighthouselabs.ca',
+    'ghijkl': 'http://www.google.com',
+  },
+  greeting: 'Here are your URLs!'
 };
 
 app.get('/', (req, res) => {
@@ -15,7 +18,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  res.render('pages/urls');
+  res.render('pages/urls', { 
+    data: urlDatabase.data,
+    greeting: urlDatabase.greeting });
 });
 
 app.get('/about', (req,res) => {
