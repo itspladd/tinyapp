@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  res.render('pages/urls', { 
+  res.render('pages/urls_index', { 
     data: urlDatabase.data,
     greeting: urlDatabase.greeting });
 });
