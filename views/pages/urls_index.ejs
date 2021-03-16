@@ -4,9 +4,9 @@
   <%- include('../partials/head') %>
 </head>
 <body>
-  <%- include('../partials/header') %>
+  <%- include('../partials/header', {username: username}) %>
   <main style="margin: 1em">
-    <h3><%= greeting %></h3>
+    <h3><%= username %>'s URLs:</h3>
     <table class="table">
       <thead>
         <tr>
