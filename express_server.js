@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 const urlDatabase = {
-  data: { 
+  data: {
     'abcdef': 'http://www.lighthouselabs.ca',
     'ghijkl': 'http://www.google.com',
   }
@@ -35,7 +35,7 @@ app.post('/urls', (req, res) => {
   const shortURL = helper.randomString();
   urlDatabase.data[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
-})
+});
 
 app.get('/urls/new', (req, res) => {
   res.render('pages/urls_new');
@@ -56,11 +56,11 @@ app.get('/u/:shortURL', (req, res) => {
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!longURL) {
     const templateVars = {
-      shortURL
-    }
+      shortURL,
+    };
     res.render('pages/bad_url', templateVars);
   } else {
-  res.redirect(longURL);
+    res.redirect(longURL);
   }
 });
 
