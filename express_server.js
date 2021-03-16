@@ -53,6 +53,13 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+app.post('/urls/:shortURL/update', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  res.redirect('/urls');
+});
+
 // Redirects the user to the long URL specified by the short URL key.
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
