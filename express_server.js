@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const helper = require('./helpers');
 const app = express();
 const PORT = 8080;
 
@@ -8,6 +9,8 @@ app.set('view engine', 'ejs');
 
 // Body parser
 app.use(bodyParser.urlencoded({extended: true}));
+
+
 
 const urlDatabase = {
   data: { 
@@ -29,7 +32,7 @@ app.get('/urls', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
-  const shortURL = randomString();
+  const shortURL = helper.randomString();
   urlDatabase.data[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 })
@@ -72,23 +75,3 @@ app.get('/urls.json', (req, res) => {
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}`);
 });
-
-// Helper functions to generate a random string and random int.
-// TODO: Make sure this can actually return Z.
-const randomString = () => {
-  let str = "";
-
-  while (str.length < 6) {
-    code = randInt(48, 122);
-    if (!(code > 57 && code < 65) && !(code > 90 && code < 97)) {
-      str += String.fromCharCode(code);
-    }
-  }
-
-  return str;
-}
-
-// Generates a random integer between two values.
-const randInt = (min, max) => {
-  return Math.floor((Math.random() * (max-min + 1))) + min;
-}
