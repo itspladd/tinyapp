@@ -22,5 +22,8 @@
     <span class="navbar-text">
       <a class="nav-item nav-link">Logged in as: <%= username %></a>
     </span>
+    <form class="form-inline" action="/logout" method="POST">
+      <button type="submit" class="btn btn-info">Logout</button>
+    </form>
   <% } %>  
 </nav>
