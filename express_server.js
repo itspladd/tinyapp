@@ -21,16 +21,20 @@ const urlDatabase = {
 };
 
 app.get('/', (req, res) => {
-  res.render('pages/index');
+  const templateVars = {
+    username: req.cookies['username'],
+  };
+  res.render('pages/index', templateVars);
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('name', req.body.username);
+  res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
   const templateVars = {
+    username: req.cookies['username'],
     urls: urlDatabase,
     greeting: 'My URLs:'
   };
@@ -44,11 +48,15 @@ app.post('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  res.render('pages/urls_new');
+  const templateVars = {
+    username: req.cookies['username'],
+  };
+  res.render('pages/urls_new', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
+    username: req.cookies['username'],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
@@ -75,6 +83,7 @@ app.get('/u/:shortURL', (req, res) => {
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!longURL) {
     const templateVars = {
+      username: req.cookies['username'],
       shortURL,
     };
     res.render('pages/bad_url', templateVars);
@@ -84,7 +93,10 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.get('/about', (req,res) => {
-  res.render('pages/about');
+  const templateVars = {
+    username: req.cookies['username'],
+  };
+  res.render('pages/about', templateVars);
 });
 
 app.get('/urls.json', (req, res) => {
