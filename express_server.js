@@ -46,9 +46,19 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render('pages/urls_show', templateVars);
 });
 
+// Redirects the user to the long URL specified by the short URL key.
 app.get('/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
   const longURL = urlDatabase.data[req.params.shortURL];
+  // If the retrieved longURL is undefined, go to the "url not found" page.
+  if (!longURL) {
+    const templateVars = {
+      shortURL
+    }
+    res.render('pages/bad_url', templateVars);
+  } else {
   res.redirect(longURL);
+  }
 });
 
 app.get('/about', (req,res) => {
@@ -59,14 +69,12 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get('/howdy', (req, res) => {
-  res.send('<html><body>Howdy, <h1>PARDNER</h1></body></html>');
-});
-
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}`);
 });
 
+// Helper functions to generate a random string and random int.
+// TODO: Make sure this can actually return Z.
 const randomString = () => {
   let str = "";
 
@@ -80,6 +88,7 @@ const randomString = () => {
   return str;
 }
 
+// Generates a random integer between two values.
 const randInt = (min, max) => {
   return Math.floor((Math.random() * (max-min))) + min;
 }
