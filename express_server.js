@@ -24,6 +24,11 @@ app.get('/', (req, res) => {
   res.render('pages/index');
 });
 
+app.post('/login', (req, res) => {
+  res.cookie('name', req.body.username);
+  res.redirect('/urls');
+});
+
 app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase,
