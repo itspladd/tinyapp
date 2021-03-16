@@ -13,10 +13,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 const urlDatabase = {
-  data: {
-    'abcdef': 'http://www.lighthouselabs.ca',
-    'ghijkl': 'http://www.google.com',
-  }
+  'abcdef': 'http://www.lighthouselabs.ca',
+  'ghijkl': 'http://www.google.com',
 };
 
 app.get('/', (req, res) => {
@@ -25,7 +23,7 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const templateVars = {
-    urls: urlDatabase.data,
+    urls: urlDatabase,
     greeting: 'My URLs:'
   };
   res.render('pages/urls_index', templateVars);
@@ -33,7 +31,7 @@ app.get('/urls', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const shortURL = helper.randomString();
-  urlDatabase.data[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -44,15 +42,21 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase.data[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL],
   };
   res.render('pages/urls_show', templateVars);
+});
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
 });
 
 // Redirects the user to the long URL specified by the short URL key.
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase.data[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL];
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!longURL) {
     const templateVars = {
