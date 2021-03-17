@@ -2,10 +2,12 @@
  *  HELPER FUNCTIONS
  */
 
-const randomString = () => {
+// Creates a string of random alphanumeric (upper and lowercase) characters
+// Length can be any length, default is 6
+const randomString = (length = 6) => {
   let str = "";
 
-  while (str.length < 6) {
+  while (str.length < length) {
     let code = randInt(48, 122);
     if (!(code > 57 && code < 65) && !(code > 90 && code < 97)) {
       str += String.fromCharCode(code);
@@ -21,6 +23,18 @@ const randInt = (min, max) => {
   return Math.floor((Math.random() * range) + min);
 };
 
+// Adds the input key and value to every object within the input object.
+// REQUIRES an object containing objects.
+const addToAll = (target, key, value) => {
+  if(!target || typeof target !== "object") {
+    console.log('Bad argument given to addToAll');
+    return undefined;
+  }
+  console.log('adding to target')
+  Object.values(target).forEach( obj => obj[key] = value);
+};
+
 module.exports = {
   randomString,
+  addToAll,
 };
