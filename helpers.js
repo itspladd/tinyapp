@@ -33,7 +33,18 @@ const addToAll = (target, key, value) => {
   Object.values(target).forEach( obj => obj[key] = value);
 };
 
+// Check if an email already exists in our user data.
+const emailExists = (users, email) => {
+  for (let id in users) {
+    if (users[id].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
 module.exports = {
   randomString,
   addToAll,
+  emailExists,
 };
