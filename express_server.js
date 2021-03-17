@@ -8,13 +8,7 @@ const app = express();
 const PORT = 8080;
 const TEMPLATEVARS = require('./constants').TEMPLATEVARS;
 
-// Our view engine is EJS
-app.set('view engine', 'ejs');
-
-// Body parser
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
-
+// 'Databases'
 const urlDatabase = {
   'abcdef': 'http://www.lighthouselabs.ca',
   'ghijkl': 'http://www.google.com',
@@ -23,15 +17,36 @@ const urlDatabase = {
 const users = {
   userID1: {
     id: 'userID1',
+    name: 'user1',
     email: 'user1@example.com',
     password: 'password1',
   },
   userID2: {
     id: 'userID2',
+    name: 'user2',
     email: 'user2@example.com',
     password: 'password2',
   }
 }
+
+// Our view engine is EJS
+app.set('view engine', 'ejs');
+
+// Body parser
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+
+// Custom middleware - if we don't have a username set, and there's an ID cookie, set the username.
+app.use( (req, res, next) => {
+  if (!TEMPLATEVARS.home['username'] && req.cookies['user_id'] && users[req.cookies['user_id']]) {
+    const id = req.cookies['user_id'];
+    helper.addToAll(TEMPLATEVARS, 'username', users[id].name);
+  }
+  next();
+});
+
+
+
 
 /***********************************/
 /** ROUTING ************************/
@@ -140,21 +155,22 @@ app.post('/logout', (req, res) => {
 
 app.post('/register', (req, res) => {
   // Set input vars
-  const id = helper.randomString(10);
+  const user_id = helper.randomString(10);
   const email = req.body.email;
+  const username = req.body.username;
   const password = req.body.password;
 
+  //Set templatevars
+  helper.addToAll(TEMPLATEVARS, 'username', username);
+
   // Add new user object
-  users[id] = {
-    id,
+  users[user_id] = {
+    user_id,
     email,
     password,
   };
-  for (const user of Object.values(users)) {
-    console.log(user);
-  }
   // Create cookie for this login
-  res.cookie('user_id', id);
+  res.cookie('user_id', user_id);
 
   // Redirect to /urls
   res.redirect('/urls');

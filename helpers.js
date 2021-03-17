@@ -30,7 +30,6 @@ const addToAll = (target, key, value) => {
     console.log('Bad argument given to addToAll');
     return undefined;
   }
-  console.log('adding to target')
   Object.values(target).forEach( obj => obj[key] = value);
 };
 
