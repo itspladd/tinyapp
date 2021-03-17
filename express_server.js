@@ -268,5 +268,5 @@ app.post('/register', (req, res) => {
 /***********************************/
 
 app.listen(PORT, () => {
-  console.log(`TinyApp listening on port ${PORT}`);
+  console.log(`BabyURL listening on port ${PORT}`);
 });
