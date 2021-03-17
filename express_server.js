@@ -36,9 +36,11 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
-// Custom middleware - if we don't have a username set, and there's an ID cookie, set the username.
+// Custom middleware -
+// if we don't have a username set, and there's an ID cookie, AND we have that user,
+// set the user object in templatevars.
 app.use( (req, res, next) => {
-  if (!TEMPLATEVARS.home['username'] && req.cookies['user_id'] && users[req.cookies['user_id']]) {
+  if (!TEMPLATEVARS.home['user'] && req.cookies['user_id'] && users[req.cookies['user_id']]) {
     const id = req.cookies['user_id'];
     helper.addToAll(TEMPLATEVARS, 'username', users[id].name);
   }
@@ -148,8 +150,8 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  helper.addToAll(TEMPLATEVARS, 'username', '');
+  res.clearCookie('user_id');
+  helper.addToAll(TEMPLATEVARS, 'user', {});
   res.redirect('/urls');
 });
 
@@ -160,8 +162,6 @@ app.post('/register', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  //Set templatevars
-  helper.addToAll(TEMPLATEVARS, 'username', username);
 
   // Add new user object
   users[user_id] = {
@@ -169,6 +169,10 @@ app.post('/register', (req, res) => {
     email,
     password,
   };
+
+  //Set templatevars
+  helper.addToAll(TEMPLATEVARS, 'user', users[user_id]);
+
   // Create cookie for this login
   res.cookie('user_id', user_id);
 
