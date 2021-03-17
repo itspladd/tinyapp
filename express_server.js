@@ -118,9 +118,8 @@ app.get('/', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   if (!req.cookies['user_id']) {
-    const redirectPage = 'login';
-    errorHandler.addError(redirectPage, 'You have to log in first!',
-    () => res.redirect(`/${redirectPage}`));
+    errorHandler.addError('login', 'You have to log in first!',
+    () => res.redirect('login'));
   } else {
     res.render('pages/urls_new', TEMPLATEVARS.urls_new);
   }
