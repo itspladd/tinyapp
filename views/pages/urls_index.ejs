@@ -19,7 +19,7 @@
         <% for (const key in urls) { %>
           <tr>
             <td><a href="/urls/<%= key %>"><%= key %></a></td>
-            <td><a href=<%= urls[key] %>><%= urls[key] %></a></td>
+            <td><a href=<%= urls[key].longURL %>><%= urls[key].longURL %></a></td>
             <td>
               <form method="GET" action="/u/<%= key %>">
                 <button type="submit" class="btn btn-success">Launch</button>
