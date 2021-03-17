@@ -11,22 +11,21 @@
           <a class="nav-item nav-link" href = "/about">About</a>
     </div>
   </div>
-  <% if(!locals.user) { %> 
-    <form class="form-inline" action="/login" method="POST">
-      <div class="form-group">
-        <input class="form-control" type="text" name="username" placeholder="username" style="width: 300px; margin: 1em">
-        <button type="submit" class="btn btn-info">Login</button>
-      </div>
-    </form>
-    <form class="form-inline" action="/register" method="GET" style="margin: 1em">
-      <button type="submit" class="btn btn-info">Register</button>
-    </form>
-  <% } else { %>
-    <span class="navbar-text">
-      <a class="nav-item nav-link">Logged in as: <%= user.email %></a>
-    </span>
-    <form class="form-inline" action="/logout" method="POST">
-      <button type="submit" class="btn btn-info">Logout</button>
-    </form>
-  <% } %>  
+  <div class="navbar-nav">
+    <% if(!locals.user) { %> 
+      <a class="nav-item nav-link" href = "/login">Login</a>
+    
+     <a class="nav-item nav-link" href = "/register">Register</a>
+    <% } else { %>
+      <span class="navbar-text">
+        <a class="nav-item nav-link">Logged in as: <%= user.email %></a>
+      </span>
+      <form class="form-inline" action="/logout" method="POST">
+        <button type="submit" class="btn btn-info">Logout</button>
+      </form>
+    <% } %> 
+  </div>
+
 </nav>
+
+ 

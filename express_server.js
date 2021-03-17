@@ -84,6 +84,10 @@ app.get('/about', (req, res) => {
   res.render('pages/about', TEMPLATEVARS.about);
 });
 
+app.get('/login', (req, res) => {
+  res.render('pages/login', TEMPLATEVARS.login);
+});
+
 app.get('/register', (req, res) => {
   res.render('pages/register', TEMPLATEVARS.register);
 });
