@@ -127,11 +127,14 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
+  // Add username to all templatevars
+  helper.addToAll(TEMPLATEVARS, 'username', req.body.username);
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
+  helper.addToAll(TEMPLATEVARS, 'username', '');
   res.redirect('/urls');
 });
 
