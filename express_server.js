@@ -10,8 +10,14 @@ const TEMPLATEVARS = require('./constants').TEMPLATEVARS;
 
 // 'Databases'
 const urlDatabase = {
-  'abcdef': 'http://www.lighthouselabs.ca',
-  'ghijkl': 'http://www.google.com',
+  'abcdef': {
+    longURL: 'http://www.lighthouselabs.ca',
+    userID: 'userID1',
+  },
+  'ghijkl': {
+    longURL: 'http://www.google.com',
+    userID: 'userID2',
+  }
 };
 
 const users = {
@@ -63,12 +69,17 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 // Custom middleware -
-// if we don't have a username set, and there's an ID cookie, AND we have that user,
+// if we don't have a user set in templatevars,
+// and there's an ID cookie, AND we have that user in database,
 // set the user object in templatevars.
 app.use( (req, res, next) => {
-  if (!TEMPLATEVARS.home['user'] && req.cookies['user_id'] && users[req.cookies['user_id']]) {
+  const userCookie = req.cookies['user_id'];
+  if (!TEMPLATEVARS.home['user'] && userCookie && users[userCookie]) {
     const id = req.cookies['user_id'];
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
+  } else if (!users[userCookie]) {
+    // If the current cookie's ID doesn't exist in our database, clear it.
+    res.clearCookie('user_id');
   }
   next();
 });
@@ -119,7 +130,7 @@ app.get('/', (req, res) => {
 app.get('/urls/new', (req, res) => {
   if (!req.cookies['user_id']) {
     errorHandler.addError('login', 'You have to log in first!',
-    () => res.redirect('login'));
+    () => res.redirect('/login'));
   } else {
     res.render('pages/urls_new', TEMPLATEVARS.urls_new);
   }
@@ -139,7 +150,7 @@ app.get('/register', (req, res) => {
 
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!longURL) {
     TEMPLATEVARS.bad_url['shortURL'] = shortURL;
@@ -150,10 +161,14 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
+  // Get the short URL and long URL for this page
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
+
+  //Set both values in the templatevars for this page
   TEMPLATEVARS.urls_show['shortURL'] = shortURL;
   TEMPLATEVARS.urls_show['longURL'] = longURL;
+
   res.render('pages/urls_show', TEMPLATEVARS.urls_show);
 });
 
@@ -171,7 +186,9 @@ app.get('/urls', (req, res) => {
  */
 app.post('/urls', (req, res) => {
   const shortURL = helper.randomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  const longURL = req.body.longURL;
+  const userID = req.cookies['user_id'];
+  urlDatabase[shortURL] = { longURL, userID };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -181,7 +198,7 @@ app.post('/urls', (req, res) => {
 app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect('/urls');
 });
 
