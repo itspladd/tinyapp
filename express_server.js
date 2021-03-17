@@ -22,6 +22,7 @@ const urlDatabase = {
 
 app.get('/', (req, res) => {
   const templateVars = {
+    title: 'TinyApp: A URL Shortener',
     username: req.cookies['username'],
   };
   res.render('pages/index', templateVars);
@@ -39,6 +40,7 @@ app.post('/logout', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const templateVars = {
+    title: 'TinyApp: My URLs',
     username: req.cookies['username'],
     urls: urlDatabase,
     greeting: 'My URLs:'
@@ -54,16 +56,20 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   const templateVars = {
+    title: 'TinyApp: Create a New Tiny URL',
     username: req.cookies['username'],
   };
   res.render('pages/urls_new', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[req.params.shortURL];
   const templateVars = {
+    shortURL,
+    longURL,
+    title: `TinyApp: URL ID ${shortURL}`,
     username: req.cookies['username'],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
   };
   res.render('pages/urls_show', templateVars);
 });
@@ -88,6 +94,7 @@ app.get('/u/:shortURL', (req, res) => {
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!longURL) {
     const templateVars = {
+      title: 'TinyApp: Bad URL',
       username: req.cookies['username'],
       shortURL,
     };
@@ -99,6 +106,7 @@ app.get('/u/:shortURL', (req, res) => {
 
 app.get('/about', (req,res) => {
   const templateVars = {
+    title: 'TinyApp: About',
     username: req.cookies['username'],
   };
   res.render('pages/about', templateVars);
