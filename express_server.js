@@ -11,10 +11,12 @@ const TEMPLATEVARS = require('./constants').TEMPLATEVARS;
 // 'Databases'
 const urlDatabase = {
   'abcdef': {
+    shortURL: 'abcdef',
     longURL: 'http://www.lighthouselabs.ca',
     userID: 'userID1',
   },
   'ghijkl': {
+    shortURL: 'abcdef',
     longURL: 'http://www.google.com',
     userID: 'userID2',
   }
@@ -127,15 +129,6 @@ app.get('/', (req, res) => {
   res.render('pages/index', TEMPLATEVARS.home);
 });
 
-app.get('/urls/new', (req, res) => {
-  if (!req.cookies['user_id']) {
-    errorHandler.addError('login', 'You have to log in first!',
-    () => res.redirect('/login'));
-  } else {
-    res.render('pages/urls_new', TEMPLATEVARS.urls_new);
-  }
-});
-
 app.get('/about', (req, res) => {
   res.render('pages/about', TEMPLATEVARS.about);
 });
@@ -160,6 +153,27 @@ app.get('/u/:shortURL', (req, res) => {
   }
 });
 
+app.get('/urls', (req, res) => {
+  const id = req.cookies['user_id'];
+  if (!id) {
+    errorHandler.addError('login',
+      'Login to see your BabyURLs, or register an account to start creating them!',
+      () => res.redirect('login')
+    );
+  }
+  TEMPLATEVARS.urls_index['urls'] = helper.urlsForUser(id, urlDatabase);
+  res.render('pages/urls_index', TEMPLATEVARS.urls_index);
+});
+
+app.get('/urls/new', (req, res) => {
+  if (!req.cookies['user_id']) {
+    errorHandler.addError('login', 'You have to log in to create a URL!',
+    () => res.redirect('/login'));
+  } else {
+    res.render('pages/urls_new', TEMPLATEVARS.urls_new);
+  }
+});
+
 app.get('/urls/:shortURL', (req, res) => {
   // Get the short URL and long URL for this page
   const shortURL = req.params.shortURL;
@@ -170,11 +184,6 @@ app.get('/urls/:shortURL', (req, res) => {
   TEMPLATEVARS.urls_show['longURL'] = longURL;
 
   res.render('pages/urls_show', TEMPLATEVARS.urls_show);
-});
-
-app.get('/urls', (req, res) => {
-  TEMPLATEVARS.urls_index['urls'] = urlDatabase;
-  res.render('pages/urls_index', TEMPLATEVARS.urls_index);
 });
 
 /**************************/
@@ -188,7 +197,7 @@ app.post('/urls', (req, res) => {
   const shortURL = helper.randomString();
   const longURL = req.body.longURL;
   const userID = req.cookies['user_id'];
-  urlDatabase[shortURL] = { longURL, userID };
+  urlDatabase[shortURL] = { shortURL, longURL, userID };
   res.redirect(`/urls/${shortURL}`);
 });
 
