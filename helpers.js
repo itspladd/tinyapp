@@ -43,8 +43,19 @@ const emailExists = (users, email) => {
   return false;
 };
 
+const lookupUserByName = (users, name) => {
+  for (const id in users) {
+    if (users[id].username === name) {
+      return id;
+    }
+  }
+
+  return undefined;
+};
+
 module.exports = {
   randomString,
   addToAll,
   emailExists,
+  lookupUserByName,
 };

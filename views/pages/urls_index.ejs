@@ -6,7 +6,7 @@
 <body>
   <%- include('../partials/header') %>
   <main style="margin: 1em">
-    <h3><%= locals.username ? `${username}'s` : 'My' %> URLs:</h3>
+    <h3><%= locals.user ? `${user.username}'s` : 'My' %> URLs:</h3>
     <table class="table">
       <thead>
         <tr>

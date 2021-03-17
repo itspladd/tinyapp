@@ -17,13 +17,13 @@ const urlDatabase = {
 const users = {
   userID1: {
     id: 'userID1',
-    name: 'user1',
+    username: 'user1',
     email: 'user1@example.com',
     password: 'password1',
   },
   userID2: {
     id: 'userID2',
-    name: 'user2',
+    username: 'user2',
     email: 'user2@example.com',
     password: 'password2',
   }
@@ -42,7 +42,7 @@ app.use(cookieParser());
 app.use( (req, res, next) => {
   if (!TEMPLATEVARS.home['user'] && req.cookies['user_id'] && users[req.cookies['user_id']]) {
     const id = req.cookies['user_id'];
-    helper.addToAll(TEMPLATEVARS, 'username', users[id].name);
+    helper.addToAll(TEMPLATEVARS, 'user', users[id]);
   }
   next();
 });
@@ -147,10 +147,20 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  // Add username to all templatevars
-  helper.addToAll(TEMPLATEVARS, 'username', req.body.username);
-  res.redirect('/urls');
+  const id = helper.lookupUserByName(users, req.body.username);
+  if (!id) {
+    console.log('bad id');
+    res.status(403).send('User not found!');
+  } else if (users[id].password !== req.body.password) {
+    console.log('bad pw');
+    res.status(403).send('Incorrect login information.');
+  } else {
+    console.log('all good')
+    res.cookie('user_id', id);
+    // Add username to all templatevars
+    helper.addToAll(TEMPLATEVARS, 'user', users[id]);
+    res.redirect('/urls');
+  }
 });
 
 app.post('/logout', (req, res) => {
@@ -175,6 +185,7 @@ app.post('/register', (req, res) => {
     users[user_id] = {
       user_id,
       email,
+      username,
       password,
     };
 
