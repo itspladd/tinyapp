@@ -151,7 +151,7 @@ app.post('/login', (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  helper.addToAll(TEMPLATEVARS, 'user', {});
+  helper.addToAll(TEMPLATEVARS, 'user', '');
   res.redirect('/urls');
 });
 
@@ -162,22 +162,27 @@ app.post('/register', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
+  if (email === "" || username === "" || password === "") {
+    res.status(400).send('No blank fields!');
+  } else if (helper.emailExists(users, email)) {
+    res.status(400).send('Sorry, that email is taken!');
+  } else {
+    // Add new user object
+    users[user_id] = {
+      user_id,
+      email,
+      password,
+    };
 
-  // Add new user object
-  users[user_id] = {
-    user_id,
-    email,
-    password,
-  };
+    //Set templatevars
+    helper.addToAll(TEMPLATEVARS, 'user', users[user_id]);
 
-  //Set templatevars
-  helper.addToAll(TEMPLATEVARS, 'user', users[user_id]);
+    // Create cookie for this login
+    res.cookie('user_id', user_id);
 
-  // Create cookie for this login
-  res.cookie('user_id', user_id);
-
-  // Redirect to /urls
-  res.redirect('/urls');
+    // Redirect to /urls
+    res.redirect('/urls');
+  }
 });
 
 
