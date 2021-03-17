@@ -29,6 +29,32 @@ const users = {
   }
 }
 
+const errorHandler = {
+  errorMessageFlag: false,
+  removeErrorsFlag: false,
+
+  addError(page, message, callback) {
+    TEMPLATEVARS[page]['error'] = message;
+    this.setErrorFlag(true);
+    this.setRemovalFlag(false);
+    callback();
+  },
+
+  wipeErrors() {
+    helper.removeFromAny(TEMPLATEVARS, 'error');
+    this.setRemovalFlag(false);
+    this.setErrorFlag(false);
+  },
+
+  setErrorFlag(value) {
+    this.errorMessageFlag = value;
+  },
+
+  setRemovalFlag(value) {
+    this.removeErrorsFlag = value;
+  }
+};
+
 // Our view engine is EJS
 app.set('view engine', 'ejs');
 
@@ -44,6 +70,20 @@ app.use( (req, res, next) => {
     const id = req.cookies['user_id'];
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
   }
+  next();
+});
+app.use( (req, res, next) => {
+  // If the error removal flag is set, remove error messages from templatevars.
+  if (errorHandler.removeErrorsFlag) {
+    errorHandler.wipeErrors();
+  }
+
+  // If we have an error message flag raised, then lower it and set the "remove" flag.
+  // Next time we load a page, we'll remove the error so we don't see it again.
+  if (errorHandler.errorMessageFlag) {
+    errorHandler.setRemovalFlag(true);
+  }
+
   next();
 });
 
@@ -77,7 +117,13 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  res.render('pages/urls_new', TEMPLATEVARS.urls_new);
+  if (!req.cookies['user_id']) {
+    const redirectPage = 'login';
+    errorHandler.addError(redirectPage, 'You have to log in first!',
+    () => res.redirect(`/${redirectPage}`));
+  } else {
+    res.render('pages/urls_new', TEMPLATEVARS.urls_new);
+  }
 });
 
 app.get('/about', (req, res) => {

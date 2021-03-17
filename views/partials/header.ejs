@@ -27,5 +27,10 @@
   </div>
 
 </nav>
+<% if (locals.error) { %>
+  <div class="alert alert-warning">
+    <%= error %>
+  </div>
+<% } %> 
 
  

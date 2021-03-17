@@ -33,6 +33,18 @@ const addToAll = (target, key, value) => {
   Object.values(target).forEach( obj => obj[key] = value);
 };
 
+// Adds the input key and value to every object within the input object.
+// REQUIRES an object containing objects.
+const removeFromAny = (target, key) => {
+  if(!target || typeof target !== "object") {
+    console.log('Bad argument given to removeFromAny');
+    return undefined;
+  }
+  for (const obj of Object.values(target)) {
+    delete obj[key];
+  }
+};
+
 // Check if an email already exists in our user data.
 const emailExists = (users, email) => {
   for (let id in users) {
@@ -56,6 +68,7 @@ const lookupUserByName = (users, name) => {
 module.exports = {
   randomString,
   addToAll,
+  removeFromAny,
   emailExists,
   lookupUserByName,
 };
