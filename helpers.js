@@ -65,10 +65,16 @@ const lookupUserByName = (users, name) => {
   return undefined;
 };
 
+const urlsForUser = (id, urls) => {
+  return Object.values(urls)
+    .filter(url => url.userID === id);
+};
+
 module.exports = {
   randomString,
   addToAll,
   removeFromAny,
   emailExists,
   lookupUserByName,
+  urlsForUser,
 };
