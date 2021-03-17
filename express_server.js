@@ -4,7 +4,9 @@ const cookieParser = require('cookie-parser');
 
 const helper = require('./helpers');
 const app = express();
+
 const PORT = 8080;
+const TEMPLATEVARS = require('./constants').TEMPLATEVARS;
 
 // Our view engine is EJS
 app.set('view engine', 'ejs');
@@ -18,9 +20,18 @@ const urlDatabase = {
   'ghijkl': 'http://www.google.com',
 };
 
-
-
-
+const users = {
+  userID1: {
+    id: 'userID1',
+    email: 'user1@example.com',
+    password: 'password1',
+  },
+  userID2: {
+    id: 'userID2',
+    email: 'user2@example.com',
+    password: 'password2',
+  }
+}
 
 /***********************************/
 /** ROUTING ************************/
@@ -31,6 +42,14 @@ const urlDatabase = {
 /**************************/
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
+});
+
+app.get('/users.json', (req, res) => {
+  res.json(users);
+});
+
+app.get('/templateVars.json', (req, res) => {
+  res.json(TEMPLATEVARS);
 });
 
 /**************************/
@@ -111,10 +130,28 @@ app.get('/urls', (req, res) => {
 /** POST ******************/
 /**************************/
 
+/**
+ * Creates a new shortURL for a given longURL
+ */
+app.post('/urls', (req, res) => {
+  const shortURL = helper.randomString();
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
+});
+
+/**
+ * Updates an existing shortURL with a new longURL
+ */
 app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
+  res.redirect('/urls');
+});
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
 
@@ -128,17 +165,28 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
-app.post('/urls', (req, res) => {
-  const shortURL = helper.randomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
-});
+app.post('/register', (req, res) => {
+  // Set input vars
+  const id = helper.randomString(10);
+  const email = req.body.email;
+  const password = req.body.password;
 
-app.post('/urls/:shortURL/delete', (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+  // Add new user object
+  users[id] = {
+    id,
+    email,
+    password,
+  };
+  for (const user of Object.values(users)) {
+    console.log(user);
+  }
+  // Create cookie for this login
+  res.cookie('user_id', id);
+
+  // Redirect to /urls
   res.redirect('/urls');
 });
+
 
 /***********************************/
 /** END OF ROUTING *****************/
