@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
 const MessageHandler = require('./MessageHandler.js');
@@ -45,20 +45,23 @@ app.set('view engine', 'ejs');
 
 // Body parser
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  secret: '1by1sAgr3ml1n',
+}));
 
 // Custom middleware -
 // if we don't have a user set in templatevars,
 // and there's an ID cookie, AND we have that user in database,
 // set the user object in templatevars.
 app.use((req, res, next) => {
-  const userCookie = req.cookies['userID'];
-  if (!TEMPLATEVARS.home['user'] && userCookie && users[userCookie]) {
-    const id = req.cookies['userID'];
+  const userID = req.session.user_id;
+  if (!TEMPLATEVARS.home['user'] && userID && users[userID]) {
+    const id = req.session.user_id;
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
-  } else if (!users[userCookie]) {
+  } else if (!users[userID]) {
     // If the current cookie's ID doesn't exist in our database, clear it.
-    res.clearCookie('userID');
+    req.session.user_id = null;
   }
   next();
 });
@@ -125,7 +128,7 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const id = req.cookies['userID'];
+  const id = req.session.user_id;
   if (!id) {
     messageHandler.addError('login',
       'Login to see your URLs, or register an account to start creating them!',
@@ -138,7 +141,7 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  if (!req.cookies['userID']) {
+  if (!req.session.user_id) {
     messageHandler.addError('login', 'You have to log in to create a URL!',
       () => res.redirect('/login'));
   } else {
@@ -155,7 +158,7 @@ app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   
-  const id = req.cookies['userID'];
+  const id = req.session.user_id;
   if (!id) {
     messageHandler.addError('login',
       'Login to see your URLs, or register an account to start creating them!',
@@ -183,7 +186,7 @@ app.get('/urls/:shortURL', (req, res) => {
  * Creates a new shortURL for a given longURL
  */
 app.post('/urls', (req, res) => {
-  const userID = req.cookies['userID'];
+  const userID = req.session.user_id;
   if (!userID) {
     messageHandler.addError('login',
       'You have to log in to create a URL!',
@@ -201,7 +204,7 @@ app.post('/urls', (req, res) => {
  * Updates an existing shortURL with a new longURL
  */
 app.post('/urls/:shortURL/update', (req, res) => {
-  const userID = req.cookies['userID'];
+  const userID = req.session.user_id;
   const shortURL = req.params.shortURL;
   if (!userID) {
     messageHandler.addError('login',
@@ -229,7 +232,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const userID = req.cookies['userID'];
+  const userID = req.session.user_id;
   const shortURL = req.params.shortURL;
   if (!userID) {
     messageHandler.addError('login',
@@ -256,7 +259,7 @@ app.post('/login', (req, res) => {
   } else if (!bcrypt.compareSync(req.body.password, users[id].password)) {
     res.status(403).send('Incorrect login information.');
   } else {
-    res.cookie('userID', id);
+    req.session.user_id = id;
     // Add username to all templatevars
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
     res.redirect('/urls');
@@ -264,7 +267,7 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('userID');
+  req.session.user_id = null;
   helper.addToAll(TEMPLATEVARS, 'user', '');
   res.redirect('/login');
 });
@@ -293,7 +296,7 @@ app.post('/register', (req, res) => {
     helper.addToAll(TEMPLATEVARS, 'user', users[userID]);
 
     // Create cookie for this login
-    res.cookie('userID', userID);
+    req.session.user_id = userID
 
     // Redirect to /urls
     res.redirect('/urls');
