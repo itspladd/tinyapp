@@ -100,9 +100,10 @@ app.get('/templateVars.json', (req, res) => {
 app.get('/', (req, res) => {
   if (req.session.userID) {
     res.redirect('/urls');
-  } else {
-    res.redirect('/login');
+    return;
   }
+
+  res.redirect('/login');
 });
 
 app.get('/about', (req, res) => {
@@ -121,32 +122,33 @@ app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!urlDatabase[shortURL]) {
-    res.redirect('/urls/not_found');
-  } else {
-    res.redirect(urlDatabase[shortURL].longURL);
+    messageHandler.addBadURLError(shortURL);
+    res.render('pages/bad_url', TEMPLATEVARS.bad_url);
+    return;
   }
+  res.redirect(urlDatabase[shortURL].longURL);
 });
 
 app.get('/urls', (req, res) => {
   const id = req.session.userID;
   if (!id) {
-    messageHandler.addError('login',
-      'Login to see your URLs, or register an account to start creating them!',
-      () => res.redirect('/login')
-    );
-  } else {
-    TEMPLATEVARS.urls_index['urls'] = helper.urlsForUser(id, urlDatabase);
-    res.render('pages/urls_index', TEMPLATEVARS.urls_index);
+    messageHandler.addGenericLoginError('see your URLs');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
+    return;
   }
+
+  TEMPLATEVARS.urls_index['urls'] = helper.urlsForUser(id, urlDatabase);
+  res.render('pages/urls_index', TEMPLATEVARS.urls_index);
 });
 
 app.get('/urls/new', (req, res) => {
   if (!req.session.userID) {
-    messageHandler.addError('login', 'You have to log in to create a URL!',
-      () => res.redirect('/login'));
-  } else {
-    res.render('pages/urls_new', TEMPLATEVARS.urls_new);
+    messageHandler.addGenericLoginError('create new URLs');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
+    return;
   }
+  
+  res.render('pages/urls_new', TEMPLATEVARS.urls_new);
 });
 
 app.get('/urls/not_found', (req, res) => {
@@ -154,26 +156,27 @@ app.get('/urls/not_found', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
+  // If the URL doesn't exist, redirect the user.
+  if (!urlDatabase[req.params.shortURL]) {
+    messageHandler.addBadURLError(req.params.shortURL);
+    res.render('pages/bad_url', TEMPLATEVARS.bad_url);
+    return;
+  }
+  
   // Get the short URL and long URL for this page
   const shortURL = req.params.shortURL;
-
-  // If the URL doesn't exist, redirect the user.
-  if (!urlDatabase[shortURL]) {
-    res.redirect('/urls/not_found'); 
-  }
   const longURL = urlDatabase[shortURL].longURL;
-  
   const id = req.session.userID;
+
   if (!id) {
-    messageHandler.addError('login',
-      'Login to see your URLs, or register an account to start creating them!',
-      () => res.redirect('/login')
-    );
-  } else if (urlDatabase[shortURL].userID !== id) {
-    messageHandler.addError('urls_index',
-      'You can only view URLs that belong to you!',
-      () => res.redirect('/urls')
-    );
+    messageHandler.addGenericLoginError('view a URL');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
+    return;
+  }
+  if (urlDatabase[shortURL].userID !== id) {
+    messageHandler.addGenericPermissionsError('view');
+    res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
+    return;
   }
 
   //Set both values in the templatevars for this page
@@ -193,16 +196,15 @@ app.get('/urls/:shortURL', (req, res) => {
 app.post('/urls', (req, res) => {
   const userID = req.session.userID;
   if (!userID) {
-    messageHandler.addError('login',
-      'You have to log in to create a URL!',
-      () => res.redirect('/login')
-    );
-  } else {
-    const shortURL = helper.randomString();
-    const longURL = req.body.longURL;
-    urlDatabase[shortURL] = { shortURL, longURL, userID };
-    res.redirect(`/urls/${shortURL}`);
+    messageHandler.addGenericLoginError('create a URL');
+    res.status(401).render('/login', TEMPLATEVARS.login);
+    return;
   }
+
+  const shortURL = helper.randomString();
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = { shortURL, longURL, userID };
+  res.redirect(`/urls/${shortURL}`);
 });
 
 /**
@@ -212,63 +214,63 @@ app.post('/urls/:shortURL', (req, res) => {
   const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
-    messageHandler.addError('login',
-      `You have to log in to update a URL!`,
-      () => res.redirect('/login')
-    );
-  } else if (!urlDatabase[shortURL]) {
-    // If the URL doesn't exist
-    messageHandler.addError('bad_url',
-      `URL ${shortURL} not found!`,
-      () => res.redirect('/login')
-    );
-  } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
+    messageHandler.addGenericLoginError('update a url');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
+    return;
+  }
+  if (!urlDatabase[shortURL]) {
+    messageHandler.addBadURLError(shortURL);
+    res.render('pages/bad_url', TEMPLATEVARS.bad_url);
+    return;
+  }
+  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
     // If the URL exists, but doesn't belong to this user
-    messageHandler.addError('login',
-      `You can't change other users' URLs!`,
-      () => res.redirect('/login')
-    );
-  } else {
-    const longURL = req.body.longURL;
-    urlDatabase[shortURL].longURL = longURL;
-    res.redirect('/urls');
+    messageHandler.addGenericPermissionsError('edit');
+    res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
+    return;
   }
 
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL].longURL = longURL;
+  res.redirect('/urls');
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
-    messageHandler.addError('login',
-      `You have to log in to delete a URL!`,
-      () => res.redirect('/login')
-    );
-  } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
-    // If the URL exists, but doesn't belong to this user
-    messageHandler.addError('login',
-      `You can't delete other users' URLs!`,
-      () => res.redirect('/login')
-    );
-  } else {
-
-    delete urlDatabase[shortURL];
-    res.redirect('/urls');
+    messageHandler.addGenericLoginError('delete a URL');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
+    return;
   }
+  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
+    // If the URL exists, but doesn't belong to this user
+    messageHandler.addGenericPermissionsError('delete');
+    res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
+    return;
+  }
+
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
 });
 
 app.post('/login', (req, res) => {
   const id = helper.lookupUserByEmail(users, req.body.username);
   if (!id) {
-    res.status(403).send('User not found!');
-  } else if (!bcrypt.compareSync(req.body.password, users[id].password)) {
-    res.status(403).send('Incorrect login information.');
-  } else {
-    req.session.userID = id;
-    // Add username to all templatevars
-    helper.addToAll(TEMPLATEVARS, 'user', users[id]);
-    res.redirect('/urls');
+    messageHandler.addLoginValidationError('No user with that email exists.');
+    res.status(403).render('pages/login', TEMPLATEVARS.login);
+    return;
   }
+  if (!bcrypt.compareSync(req.body.password, users[id].password)) {
+    messageHandler.addLoginValidationError('Incorrect login credentials.');
+    res.status(403).render('pages/login', TEMPLATEVARS.login);
+    return;
+  }
+
+  req.session.userID = id;
+  // Add user to all templatevars
+  helper.addToAll(TEMPLATEVARS, 'user', users[id]);
+  res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
@@ -285,27 +287,32 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
 
   if (email === "" || username === "" || password === "") {
-    res.status(400).send('No blank fields!');
-  } else if (helper.emailExists(users, email)) {
-    res.status(400).send('Sorry, that email is taken!');
-  } else {
-    // Add new user object
-    users[userID] = {
-      userID,
-      email,
-      username,
-      password: bcrypt.hashSync(password, 10)
-    };
-
-    //Set templatevars
-    helper.addToAll(TEMPLATEVARS, 'user', users[userID]);
-
-    // Create cookie for this login
-    req.session.userID = userID;
-
-    // Redirect to /urls
-    res.redirect('/urls');
+    messageHandler.addRegistrationError('No blank fields allowed!');
+    res.status(400).render('pages/register', TEMPLATEVARS.register);
+    return;
   }
+  
+  if (helper.emailExists(users, email)) {
+    messageHandler.addRegistrationError('Sorry, that email is taken!');
+    res.status(400).render('pages/register', TEMPLATEVARS.register);
+    return;
+  }
+  // Add new user object
+  users[userID] = {
+    userID,
+    email,
+    username,
+    password: bcrypt.hashSync(password, 10)
+  };
+
+  //Set templatevars
+  helper.addToAll(TEMPLATEVARS, 'user', users[userID]);
+
+  // Create cookie for this login
+  req.session.userID = userID;
+
+  // Redirect to /urls
+  res.redirect('/urls');
 });
 
 

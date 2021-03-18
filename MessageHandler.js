@@ -68,6 +68,14 @@ class MessageHandler {
     this.addError({ page: 'urls_index', message: `You can't ${action} URLs that don't belong to you!`});
   }
 
+  addRegistrationError(message) {
+    this.addError({ page: 'register', message: `${message}`});
+  }
+
+  addLoginValidationError(message) {
+    this.addError({ page: 'login', message: `${message}`});
+  }
+
   addBadURLError(shortURL) {
     this.TEMPLATEVARS.bad_url['shortURL'] = shortURL;
     this.setErrorFlag(true);
