@@ -39,12 +39,15 @@ const addToAll = (target, key, value) => {
 // Adds the input key and value to every object within the input object.
 // REQUIRES an object containing objects.
 const removeFromAny = (target, key) => {
-  if (!target || typeof target !== "object") {
-    console.log('Bad argument given to removeFromAny');
+  if (!target || !key || typeof target !== "object") {
     return undefined;
   }
-  for (const obj of Object.values(target)) {
-    delete obj[key];
+
+  if (isObjectOfObjects(target)) {
+    for (const obj of Object.values(target)) {
+      delete obj[key];
+    }
+    return true;
   }
 };
 
@@ -99,7 +102,7 @@ const isObjectOfObjects = input => {
   }
 
   return true;
-}
+};
 
 module.exports = {
   randomString,

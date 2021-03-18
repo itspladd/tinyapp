@@ -30,7 +30,7 @@ const testUsersStatic = {
 
 describe('#lookupUserByEmail', () => {
   it(`should not modify the original data`, () => {
-    lookupUserByEmail(testUsers, "user2@example.com")
+    lookupUserByEmail(testUsers, "user2@example.com");
     assert.deepEqual(testUsers, testUsersStatic);
   });
   it(`should return a user ID when given an email and an object of users including that email`, () => {

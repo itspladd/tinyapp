@@ -35,11 +35,11 @@ describe('#emailExists', () => {
     assert.deepEqual(testUsers, testUsersStatic);
   });
   it(`should return true if the given email already exists in the database`, () => {
-    input = 'user2@example.com';
+    const input = 'user2@example.com';
     assert.isTrue(emailExists(testUsers, input));
   });
   it(`should return false if the given email is not in the database`, () => {
-    input = 'user3@example.com';
+    const input = 'user3@example.com';
     assert.isFalse(emailExists(testUsers, input));
   });
   it(`should throw an error if the target is not an object containing other objects`, () => {
