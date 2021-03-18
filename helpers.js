@@ -65,9 +65,15 @@ const emailExists = (users, email) => {
 };
 
 const lookupUserByEmail = (users, email) => {
-  for (const id in users) {
-    if (users[id].email === email) {
-      return id;
+  if (!users || !email) {
+    return undefined;
+  }
+  
+  if (isObjectOfObjects(users)) {
+    for (const id in users) {
+      if (users[id].email === email) {
+        return id;
+      }
     }
   }
 
