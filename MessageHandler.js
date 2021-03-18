@@ -2,11 +2,11 @@ class MessageHandler {
   /*
   * A custom middleware message handler, to allow the site to pass
   * messages and alerts to be displayed to a user.
-  * 
+  *
   * The handler is currently accessed via its addError and
   * checkFlags functions. addError adds an alert message to a page,
   * and checkFlags monitors the handler's status flags to see if
-  * errors should be maintained or cleared. 
+  * errors should be maintained or cleared.
   */
   constructor(options) {
     /* The following lines aren't isn't great, I don't think - we're directly modifying TEMPLATEVARS
@@ -44,14 +44,14 @@ class MessageHandler {
    *  page: (string) The key in TEMPLATEVARS corresponding to the page you wish to add an error to.
    *  message: (string) The message to be displayed.
    *  redirectCallback: Expects a res.redirect('destination') function.
-   * 
+   *
    * SIDE EFFECTS:
    *  - Adds a new key/value pair to TEMPLATEVARS['page']: 'error':'message'
    *  - Raises the errorMessageFlag
    *  - Forces a lower on the removeErrorsFlag
    *  -- If we just added a new error, we want to make sure it won't get removed immediately.
    *  -- For instance, if we're on a page that's currently displaying an error, removeErrorsFlag will be raised.
-   *  -- If we happen to add an error on the next request, then the error will get cleared unless we force removeErrorsFlag to lower. 
+   *  -- If we happen to add an error on the next request, then the error will get cleared unless we force removeErrorsFlag to lower.
    */
   addError(page, message, redirectCallback) {
     this.TEMPLATEVARS[page]['error'] = message;

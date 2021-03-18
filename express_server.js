@@ -64,7 +64,7 @@ app.use((req, res, next) => {
 
 // Custom middleware: run the messageHandler to check for message flags
 app.use((req, res, next) => {
-  messageHandler.checkFlags()
+  messageHandler.checkFlags();
   next();
 });
 
