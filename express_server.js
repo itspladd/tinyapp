@@ -119,15 +119,11 @@ app.get('/register', (req, res) => {
 
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
   // If the retrieved longURL is undefined, go to the "url not found" page.
-  if (!longURL) {
-    messageHandler.addError('bad_url',
-      `URL ${shortURL} not found!`,
-      () => res.redirect('/urls/not_found')
-    );
+  if (!urlDatabase[shortURL]) {
+    res.redirect('/urls/not_found');
   } else {
-    res.redirect(longURL);
+    res.redirect(urlDatabase[shortURL].longURL);
   }
 });
 
@@ -160,6 +156,11 @@ app.get('/urls/not_found', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   // Get the short URL and long URL for this page
   const shortURL = req.params.shortURL;
+
+  // If the URL doesn't exist, redirect the user.
+  if (!urlDatabase[shortURL]) {
+    res.redirect('/urls/not_found'); 
+  }
   const longURL = urlDatabase[shortURL].longURL;
   
   const id = req.session.userID;
