@@ -253,7 +253,7 @@ app.post('/login', (req, res) => {
   const id = helper.lookupUserByName(users, req.body.username);
   if (!id) {
     res.status(403).send('User not found!');
-  } else if (users[id].password !== req.body.password) {
+  } else if (!bcrypt.compareSync(req.body.password, users[id].password)) {
     res.status(403).send('Incorrect login information.');
   } else {
     res.cookie('userID', id);
@@ -286,7 +286,7 @@ app.post('/register', (req, res) => {
       userID,
       email,
       username,
-      password,
+      password: bcrypt.hashSync(password, 10)
     };
 
     //Set templatevars
