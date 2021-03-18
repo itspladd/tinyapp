@@ -2,11 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
+const MessageHandler = require('./MessageHandler.js');
 const helper = require('./helpers');
 const app = express();
 
 const PORT = require('./constants').PORT;
 const TEMPLATEVARS = require('./constants').TEMPLATEVARS;
+const messageHandler = new MessageHandler({TEMPLATEVARS, helper});
 
 // 'Databases'
 const urlDatabase = {
@@ -37,32 +39,6 @@ const users = {
   }
 };
 
-const errorHandler = {
-  errorMessageFlag: false,
-  removeErrorsFlag: false,
-
-  addError(page, message, callback) {
-    TEMPLATEVARS[page]['error'] = message;
-    this.setErrorFlag(true);
-    this.setRemovalFlag(false);
-    callback();
-  },
-
-  wipeErrors() {
-    helper.removeFromAny(TEMPLATEVARS, 'error');
-    this.setRemovalFlag(false);
-    this.setErrorFlag(false);
-  },
-
-  setErrorFlag(value) {
-    this.errorMessageFlag = value;
-  },
-
-  setRemovalFlag(value) {
-    this.removeErrorsFlag = value;
-  }
-};
-
 // Our view engine is EJS
 app.set('view engine', 'ejs');
 
@@ -86,19 +62,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Custom middleware: run the errorHandler
+// Custom middleware: run the messageHandler to check for message flags
 app.use((req, res, next) => {
-  // If the error removal flag is set, remove error messages from templatevars.
-  if (errorHandler.removeErrorsFlag) {
-    errorHandler.wipeErrors();
-  }
-
-  // If we have an error message flag raised, then lower it and set the "remove" flag.
-  // Next time we load a page, we'll remove the error so we don't see it again.
-  if (errorHandler.errorMessageFlag) {
-    errorHandler.setRemovalFlag(true);
-  }
-
+  messageHandler.checkFlags()
   next();
 });
 
@@ -148,7 +114,7 @@ app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[shortURL].longURL;
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!longURL) {
-    errorHandler.addError('bad_url',
+    messageHandler.addError('bad_url',
       `URL ${shortURL} not found!`,
       () => res.redirect('/urls/not_found')
     );
@@ -160,7 +126,7 @@ app.get('/u/:shortURL', (req, res) => {
 app.get('/urls', (req, res) => {
   const id = req.cookies['userID'];
   if (!id) {
-    errorHandler.addError('login',
+    messageHandler.addError('login',
       'Login to see your URLs, or register an account to start creating them!',
       () => res.redirect('/login')
     );
@@ -172,7 +138,7 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   if (!req.cookies['userID']) {
-    errorHandler.addError('login', 'You have to log in to create a URL!',
+    messageHandler.addError('login', 'You have to log in to create a URL!',
       () => res.redirect('/login'));
   } else {
     res.render('pages/urls_new', TEMPLATEVARS.urls_new);
@@ -190,12 +156,12 @@ app.get('/urls/:shortURL', (req, res) => {
   
   const id = req.cookies['userID'];
   if (!id) {
-    errorHandler.addError('login',
+    messageHandler.addError('login',
       'Login to see your URLs, or register an account to start creating them!',
       () => res.redirect('/login')
     );
   } else if (urlDatabase[shortURL].userID !== id) {
-    errorHandler.addError('urls_index',
+    messageHandler.addError('urls_index',
       'You can only view URLs that belong to you!',
       () => res.redirect('/urls')
     );
@@ -218,7 +184,7 @@ app.get('/urls/:shortURL', (req, res) => {
 app.post('/urls', (req, res) => {
   const userID = req.cookies['userID'];
   if (!userID) {
-    errorHandler.addError('login',
+    messageHandler.addError('login',
       'You have to log in to create a URL!',
       () => res.redirect('/login')
     );
@@ -237,19 +203,19 @@ app.post('/urls/:shortURL/update', (req, res) => {
   const userID = req.cookies['userID'];
   const shortURL = req.params.shortURL;
   if (!userID) {
-    errorHandler.addError('login',
+    messageHandler.addError('login',
       `You have to log in to update a URL!`,
       () => res.redirect('/login')
     );
   } else if (!urlDatabase[shortURL]) {
     // If the URL doesn't exist
-    errorHandler.addError('bad_url',
+    messageHandler.addError('bad_url',
       `URL ${shortURL} not found!`,
       () => res.redirect('/login')
     );
   } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
     // If the URL exists, but doesn't belong to this user
-    errorHandler.addError('login',
+    messageHandler.addError('login',
       `You can't change other users' URLs!`,
       () => res.redirect('/login')
     );
@@ -265,13 +231,13 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.cookies['userID'];
   const shortURL = req.params.shortURL;
   if (!userID) {
-    errorHandler.addError('login',
+    messageHandler.addError('login',
       `You have to log in to delete a URL!`,
       () => res.redirect('/login')
     );
   } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
     // If the URL exists, but doesn't belong to this user
-    errorHandler.addError('login',
+    messageHandler.addError('login',
       `You can't delete other users' URLs!`,
       () => res.redirect('/login')
     );
