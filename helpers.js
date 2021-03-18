@@ -50,9 +50,15 @@ const removeFromAny = (target, key) => {
 
 // Check if an email already exists in our user data.
 const emailExists = (users, email) => {
-  for (let id in users) {
-    if (users[id].email === email) {
-      return true;
+  if (!users || !email) {
+    return undefined;
+  }
+  
+  if (isObjectOfObjects(users)) {
+    for (let id in users) {
+      if (users[id].email === email) {
+        return true;
+      }
     }
   }
   return false;

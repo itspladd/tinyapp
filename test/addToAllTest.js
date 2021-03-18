@@ -51,7 +51,7 @@ describe('#addToAll', () => {
     
     assert.throws(function() {
       addToAll(badObj, 'name', 'Pladd');
-    }, 'Error: addToAll requires an input of an object that contains only other objects');
+    }, `Error: Input contained non-object data. Bad data: ${badObj.user2RandomID}`);
   });
   it(`should return undefined for no input or missing values`, () => {
     assert.isUndefined(addToAll());
