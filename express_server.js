@@ -261,6 +261,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.cookies['user_id'];
+  const shortURL = req.params.shortURL;
   if (!userID) {
     errorHandler.addError('login',
       `You have to log in to delete a URL!`,
@@ -273,7 +274,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
       () => res.redirect('/login')
     );
   } else {
-    const shortURL = req.params.shortURL;
+
     delete urlDatabase[shortURL];
     res.redirect('/urls');
   }
