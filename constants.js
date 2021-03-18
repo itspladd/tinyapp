@@ -1,6 +1,6 @@
 const PORT = 8080;
 
-const titleBase = 'BabyURL: '
+const titleBase = 'BabyURL: ';
 
 const TEMPLATEVARS = {
   home: {
@@ -31,4 +31,5 @@ const TEMPLATEVARS = {
 
 module.exports = {
   TEMPLATEVARS,
+  PORT
 };

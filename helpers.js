@@ -26,17 +26,17 @@ const randInt = (min, max) => {
 // Adds the input key and value to every object within the input object.
 // REQUIRES an object containing objects.
 const addToAll = (target, key, value) => {
-  if(!target || typeof target !== "object") {
+  if (!target || typeof target !== "object") {
     console.log('Bad argument given to addToAll');
     return undefined;
   }
-  Object.values(target).forEach( obj => obj[key] = value);
+  Object.values(target).forEach(obj => obj[key] = value);
 };
 
 // Adds the input key and value to every object within the input object.
 // REQUIRES an object containing objects.
 const removeFromAny = (target, key) => {
-  if(!target || typeof target !== "object") {
+  if (!target || typeof target !== "object") {
     console.log('Bad argument given to removeFromAny');
     return undefined;
   }

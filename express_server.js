@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const helper = require('./helpers');
 const app = express();
 
-const PORT = 8080;
+const PORT = require('./constants').PORT;
 const TEMPLATEVARS = require('./constants').TEMPLATEVARS;
 
 // 'Databases'
@@ -35,7 +35,7 @@ const users = {
     email: 'user2@example.com',
     password: 'password2',
   }
-}
+};
 
 const errorHandler = {
   errorMessageFlag: false,
@@ -74,18 +74,20 @@ app.use(cookieParser());
 // if we don't have a user set in templatevars,
 // and there's an ID cookie, AND we have that user in database,
 // set the user object in templatevars.
-app.use( (req, res, next) => {
-  const userCookie = req.cookies['user_id'];
+app.use((req, res, next) => {
+  const userCookie = req.cookies['userID'];
   if (!TEMPLATEVARS.home['user'] && userCookie && users[userCookie]) {
-    const id = req.cookies['user_id'];
+    const id = req.cookies['userID'];
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
   } else if (!users[userCookie]) {
     // If the current cookie's ID doesn't exist in our database, clear it.
-    res.clearCookie('user_id');
+    res.clearCookie('userID');
   }
   next();
 });
-app.use( (req, res, next) => {
+
+// Custom middleware: run the errorHandler
+app.use((req, res, next) => {
   // If the error removal flag is set, remove error messages from templatevars.
   if (errorHandler.removeErrorsFlag) {
     errorHandler.wipeErrors();
@@ -156,7 +158,7 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const id = req.cookies['user_id'];
+  const id = req.cookies['userID'];
   if (!id) {
     errorHandler.addError('login',
       'Login to see your BabyURLs, or register an account to start creating them!',
@@ -169,9 +171,9 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  if (!req.cookies['user_id']) {
+  if (!req.cookies['userID']) {
     errorHandler.addError('login', 'You have to log in to create a URL!',
-    () => res.redirect('/login'));
+      () => res.redirect('/login'));
   } else {
     res.render('pages/urls_new', TEMPLATEVARS.urls_new);
   }
@@ -179,14 +181,14 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/urls/not_found', (req, res) => {
   res.render('pages/bad_url', TEMPLATEVARS.bad_url);
-})
+});
 
 app.get('/urls/:shortURL', (req, res) => {
   // Get the short URL and long URL for this page
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   
-  const id = req.cookies['user_id'];
+  const id = req.cookies['userID'];
   if (!id) {
     errorHandler.addError('login',
       'Login to see your URLs, or register an account to start creating them!',
@@ -214,7 +216,7 @@ app.get('/urls/:shortURL', (req, res) => {
  * Creates a new shortURL for a given longURL
  */
 app.post('/urls', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.cookies['userID'];
   if (!userID) {
     errorHandler.addError('login',
       'You have to log in to create a URL!',
@@ -232,7 +234,7 @@ app.post('/urls', (req, res) => {
  * Updates an existing shortURL with a new longURL
  */
 app.post('/urls/:shortURL/update', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.cookies['userID'];
   const shortURL = req.params.shortURL;
   if (!userID) {
     errorHandler.addError('login',
@@ -242,9 +244,9 @@ app.post('/urls/:shortURL/update', (req, res) => {
   } else if (!urlDatabase[shortURL]) {
     // If the URL doesn't exist
     errorHandler.addError('bad_url',
-    `URL ${shortURL} not found!`,
-    () => res.redirect('/login')
-  );
+      `URL ${shortURL} not found!`,
+      () => res.redirect('/login')
+    );
   } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
     // If the URL exists, but doesn't belong to this user
     errorHandler.addError('login',
@@ -260,7 +262,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.cookies['userID'];
   const shortURL = req.params.shortURL;
   if (!userID) {
     errorHandler.addError('login',
@@ -283,14 +285,11 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/login', (req, res) => {
   const id = helper.lookupUserByName(users, req.body.username);
   if (!id) {
-    console.log('bad id');
     res.status(403).send('User not found!');
   } else if (users[id].password !== req.body.password) {
-    console.log('bad pw');
     res.status(403).send('Incorrect login information.');
   } else {
-    console.log('all good')
-    res.cookie('user_id', id);
+    res.cookie('userID', id);
     // Add username to all templatevars
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
     res.redirect('/urls');
@@ -298,14 +297,14 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  res.clearCookie('userID');
   helper.addToAll(TEMPLATEVARS, 'user', '');
   res.redirect('/login');
 });
 
 app.post('/register', (req, res) => {
   // Set input vars
-  const user_id = helper.randomString(10);
+  const userID = helper.randomString(10);
   const email = req.body.email;
   const username = req.body.username;
   const password = req.body.password;
@@ -316,18 +315,18 @@ app.post('/register', (req, res) => {
     res.status(400).send('Sorry, that email is taken!');
   } else {
     // Add new user object
-    users[user_id] = {
-      user_id,
+    users[userID] = {
+      userID,
       email,
       username,
       password,
     };
 
     //Set templatevars
-    helper.addToAll(TEMPLATEVARS, 'user', users[user_id]);
+    helper.addToAll(TEMPLATEVARS, 'user', users[userID]);
 
     // Create cookie for this login
-    res.cookie('user_id', user_id);
+    res.cookie('userID', userID);
 
     // Redirect to /urls
     res.redirect('/urls');
