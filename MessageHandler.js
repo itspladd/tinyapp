@@ -19,12 +19,13 @@ class MessageHandler {
 
     this.errorMessageFlag = false;
     this.removeErrorsFlag = false;
+    this.checkFlags = this.checkFlagsUnbound.bind(this);
   }
 
   /*******
    * checkFlags(): The "middleware" part. checkFlags should be called on every request.
    */
-  checkFlags() {
+  checkFlagsUnbound(req, res, next) {
     // Should we wipe errors on this request? If so, do it.
     if (this.removeErrorsFlag) {
       this.wipeErrors();
@@ -36,6 +37,8 @@ class MessageHandler {
       this.setRemovalFlag(true);
       this.setErrorFlag(false);
     }
+    
+    next();
   }
 
   /*******
