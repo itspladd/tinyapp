@@ -8,9 +8,9 @@
   <div class="card text-center">
     <div class="card-header"></div>
     <div class="card-body">
-      <h5 class="card-title">Whoops! That isn't a valid TinyAPP URL.</h5>
-      <p class="card-text">Try a different one.</a></p>
-      <p class="card-text">(Hint: make sure you type the full URL, including "http://", when creating a new URL. Otherwise you'll end up back here again!)</a></p>
+      <h5 class="card-title">Whoops! <%- locals.shortURL ? `<strong>/u/${shortURL}</strong>` : 'That' %> isn't a valid TinyAPP URL.</h5>
+      <p class="card-text">Try a different one.</p>
+      <p class="card-text">(Hint: make sure you type the full URL, including "http://", when creating a new URL. Otherwise you'll end up back here again!)</p>
 
     </div>
   </div>
