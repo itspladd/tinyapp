@@ -1,6 +1,6 @@
 const PORT = 8080;
 
-const titleBase = 'BabyURL: ';
+const titleBase = 'TinyApp: ';
 
 const TEMPLATEVARS = {
   home: {

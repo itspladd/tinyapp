@@ -161,7 +161,7 @@ app.get('/urls', (req, res) => {
   const id = req.cookies['userID'];
   if (!id) {
     errorHandler.addError('login',
-      'Login to see your BabyURLs, or register an account to start creating them!',
+      'Login to see your URLs, or register an account to start creating them!',
       () => res.redirect('/login')
     );
   } else {
@@ -339,5 +339,5 @@ app.post('/register', (req, res) => {
 /***********************************/
 
 app.listen(PORT, () => {
-  console.log(`BabyURL listening on port ${PORT}`);
+  console.log(`TinyApp listening on port ${PORT}`);
 });
