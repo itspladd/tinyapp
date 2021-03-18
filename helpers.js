@@ -55,9 +55,9 @@ const emailExists = (users, email) => {
   return false;
 };
 
-const lookupUserByName = (users, name) => {
+const lookupUserByEmail = (users, email) => {
   for (const id in users) {
-    if (users[id].username === name) {
+    if (users[id].email === email) {
       return id;
     }
   }
@@ -75,6 +75,6 @@ module.exports = {
   addToAll,
   removeFromAny,
   emailExists,
-  lookupUserByName,
+  lookupUserByEmail,
   urlsForUser,
 };

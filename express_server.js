@@ -253,7 +253,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const id = helper.lookupUserByName(users, req.body.username);
+  const id = helper.lookupUserByEmail(users, req.body.username);
   if (!id) {
     res.status(403).send('User not found!');
   } else if (!bcrypt.compareSync(req.body.password, users[id].password)) {
