@@ -27,9 +27,12 @@
   </div>
 
 </nav>
-<% if (locals.error) { %>
+<% if (locals.errorMsg) { %>
   <div class="alert alert-warning">
-    <%= error %>
+    <% if (locals.error) { %>
+      <strong>Error <%= error %>:</strong> 
+    <% } %> 
+    <%= errorMsg %>
   </div>
 <% } %> 
 
