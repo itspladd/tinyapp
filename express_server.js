@@ -98,7 +98,11 @@ app.get('/templateVars.json', (req, res) => {
 /** RENDERING *************/
 /**************************/
 app.get('/', (req, res) => {
-  res.render('pages/index', TEMPLATEVARS.home);
+  if (req.session.userID) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/about', (req, res) => {
