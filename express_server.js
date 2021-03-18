@@ -55,13 +55,13 @@ app.use(cookieSession({
 // and there's an ID cookie, AND we have that user in database,
 // set the user object in templatevars.
 app.use((req, res, next) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userID;
   if (!TEMPLATEVARS.home['user'] && userID && users[userID]) {
-    const id = req.session.user_id;
+    const id = req.session.userID;
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
   } else if (!users[userID]) {
     // If the current cookie's ID doesn't exist in our database, clear it.
-    req.session.user_id = null;
+    req.session.userID = null;
   }
   next();
 });
@@ -128,7 +128,7 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const id = req.session.user_id;
+  const id = req.session.userID;
   if (!id) {
     messageHandler.addError('login',
       'Login to see your URLs, or register an account to start creating them!',
@@ -141,7 +141,7 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.userID) {
     messageHandler.addError('login', 'You have to log in to create a URL!',
       () => res.redirect('/login'));
   } else {
@@ -158,7 +158,7 @@ app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   
-  const id = req.session.user_id;
+  const id = req.session.userID;
   if (!id) {
     messageHandler.addError('login',
       'Login to see your URLs, or register an account to start creating them!',
@@ -186,7 +186,7 @@ app.get('/urls/:shortURL', (req, res) => {
  * Creates a new shortURL for a given longURL
  */
 app.post('/urls', (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userID;
   if (!userID) {
     messageHandler.addError('login',
       'You have to log in to create a URL!',
@@ -204,7 +204,7 @@ app.post('/urls', (req, res) => {
  * Updates an existing shortURL with a new longURL
  */
 app.post('/urls/:shortURL/update', (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
     messageHandler.addError('login',
@@ -232,7 +232,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
     messageHandler.addError('login',
@@ -259,7 +259,7 @@ app.post('/login', (req, res) => {
   } else if (!bcrypt.compareSync(req.body.password, users[id].password)) {
     res.status(403).send('Incorrect login information.');
   } else {
-    req.session.user_id = id;
+    req.session.userID = id;
     // Add username to all templatevars
     helper.addToAll(TEMPLATEVARS, 'user', users[id]);
     res.redirect('/urls');
@@ -267,7 +267,7 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  req.session.user_id = null;
+  req.session.userID = null;
   helper.addToAll(TEMPLATEVARS, 'user', '');
   res.redirect('/login');
 });
@@ -296,7 +296,7 @@ app.post('/register', (req, res) => {
     helper.addToAll(TEMPLATEVARS, 'user', users[userID]);
 
     // Create cookie for this login
-    req.session.user_id = userID
+    req.session.userID = userID;
 
     // Redirect to /urls
     res.redirect('/urls');
