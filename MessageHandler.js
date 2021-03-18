@@ -53,15 +53,16 @@ class MessageHandler {
    *  -- For instance, if we're on a page that's currently displaying an error, removeErrorsFlag will be raised.
    *  -- If we happen to add an error on the next request, then the error will get cleared unless we force removeErrorsFlag to lower.
    */
-  addError(page, message, redirectCallback) {
-    this.TEMPLATEVARS[page]['error'] = message;
+  addError({ page, code, message }) {
+    this.TEMPLATEVARS[page]['errorMsg'] = message;
+    this.TEMPLATEVARS[page]['error'] = code || undefined;
     this.setErrorFlag(true);
     this.setRemovalFlag(false);
-    redirectCallback();
   }
 
   wipeErrors() {
     this.removeFromAny(this.TEMPLATEVARS, 'error');
+    this.removeFromAny(this.TEMPLATEVARS, 'errorMsg');
     this.setRemovalFlag(false);
     this.setErrorFlag(false);
   }
