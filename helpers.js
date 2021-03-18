@@ -26,11 +26,18 @@ const randInt = (min, max) => {
 // Adds the input key and value to every object within the input object.
 // REQUIRES an object containing objects.
 const addToAll = (target, key, value) => {
-  if (!target || typeof target !== "object") {
-    console.log('Bad argument given to addToAll');
+  // Check for input existence
+  if (!target || !key || typeof target !== "object") {
     return undefined;
   }
+
+  const nonObj = Object.values(target)
+    .filter(obj => typeof obj !== "object" || Array.isArray(obj));
+  if (nonObj.length !== 0) {
+    throw new Error(`Error: addToAll requires an input of an object that contains only other objects. Bad data: ${nonObj}`);
+  }
   Object.values(target).forEach(obj => obj[key] = value);
+  return true;
 };
 
 // Adds the input key and value to every object within the input object.
