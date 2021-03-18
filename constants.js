@@ -2,6 +2,8 @@ const PORT = 8080;
 
 const titleBase = 'TinyApp: ';
 
+// ESLint is very angry about the use of underscores instead of camelCase here.
+// I left them as-is because I wanted them to match the EJS pages that they correspond to. 
 const TEMPLATEVARS = {
   home: {
     title: `${titleBase}A URL Shortener`,
