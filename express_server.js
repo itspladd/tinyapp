@@ -9,7 +9,7 @@ const app = express();
 
 const PORT = require('./constants').PORT;
 const TEMPLATEVARS = require('./constants').TEMPLATEVARS;
-const messageHandler = new MessageHandler({TEMPLATEVARS, helper});
+const messenger = new MessageHandler({TEMPLATEVARS, helper});
 
 // 'Databases'
 const urlDatabase = {
@@ -66,11 +66,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Custom middleware: run the messageHandler to check for message flags
-app.use((req, res, next) => {
-  messageHandler.checkFlags();
-  next();
-});
+// Custom middleware: run MessageHandler to check for message flags
+/*
+TODO: Replace this with something like app.use(messenger.checkFlags).
+Currently that breaks, because 
+*/
+app.use(messenger.checkFlags);
 
 
 
@@ -111,10 +112,18 @@ app.get('/about', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+  if (req.session.userID) {
+    res.redirect('/urls');
+    return;
+  }
   res.render('pages/login', TEMPLATEVARS.login);
 });
 
 app.get('/register', (req, res) => {
+  if (req.session.userID) {
+    res.redirect('/urls');
+    return;
+  }
   res.render('pages/register', TEMPLATEVARS.register);
 });
 
@@ -122,7 +131,7 @@ app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!urlDatabase[shortURL]) {
-    messageHandler.addBadURLError(shortURL);
+    messenger.addBadURLError(shortURL);
     res.render('pages/bad_url', TEMPLATEVARS.bad_url);
     return;
   }
@@ -132,7 +141,7 @@ app.get('/u/:shortURL', (req, res) => {
 app.get('/urls', (req, res) => {
   const id = req.session.userID;
   if (!id) {
-    messageHandler.addGenericLoginError('see your URLs');
+    messenger.addGenericLoginError('see your URLs');
     res.status(401).render('pages/login', TEMPLATEVARS.login);
     return;
   }
@@ -143,7 +152,7 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   if (!req.session.userID) {
-    messageHandler.addGenericLoginError('create new URLs');
+    messenger.addGenericLoginError('create new URLs');
     res.status(401).render('pages/login', TEMPLATEVARS.login);
     return;
   }
@@ -158,7 +167,7 @@ app.get('/urls/not_found', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   // If the URL doesn't exist, redirect the user.
   if (!urlDatabase[req.params.shortURL]) {
-    messageHandler.addBadURLError(req.params.shortURL);
+    messenger.addBadURLError(req.params.shortURL);
     res.render('pages/bad_url', TEMPLATEVARS.bad_url);
     return;
   }
@@ -169,12 +178,12 @@ app.get('/urls/:shortURL', (req, res) => {
   const id = req.session.userID;
 
   if (!id) {
-    messageHandler.addGenericLoginError('view a URL');
+    messenger.addGenericLoginError('view a URL');
     res.status(401).render('pages/login', TEMPLATEVARS.login);
     return;
   }
   if (urlDatabase[shortURL].userID !== id) {
-    messageHandler.addGenericPermissionsError('view');
+    messenger.addGenericPermissionsError('view');
     res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
     return;
   }
@@ -196,8 +205,8 @@ app.get('/urls/:shortURL', (req, res) => {
 app.post('/urls', (req, res) => {
   const userID = req.session.userID;
   if (!userID) {
-    messageHandler.addGenericLoginError('create a URL');
-    res.status(401).render('/login', TEMPLATEVARS.login);
+    messenger.addGenericLoginError('create a URL');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
     return;
   }
 
@@ -214,18 +223,18 @@ app.post('/urls/:shortURL', (req, res) => {
   const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
-    messageHandler.addGenericLoginError('update a url');
+    messenger.addGenericLoginError('update a url');
     res.status(401).render('pages/login', TEMPLATEVARS.login);
     return;
   }
   if (!urlDatabase[shortURL]) {
-    messageHandler.addBadURLError(shortURL);
+    messenger.addBadURLError(shortURL);
     res.render('pages/bad_url', TEMPLATEVARS.bad_url);
     return;
   }
   if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
     // If the URL exists, but doesn't belong to this user
-    messageHandler.addGenericPermissionsError('edit');
+    messenger.addGenericPermissionsError('edit');
     res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
     return;
   }
@@ -239,13 +248,13 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
-    messageHandler.addGenericLoginError('delete a URL');
+    messenger.addGenericLoginError('delete a URL');
     res.status(401).render('pages/login', TEMPLATEVARS.login);
     return;
   }
   if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
     // If the URL exists, but doesn't belong to this user
-    messageHandler.addGenericPermissionsError('delete');
+    messenger.addGenericPermissionsError('delete');
     res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
     return;
   }
@@ -257,12 +266,12 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/login', (req, res) => {
   const id = helper.lookupUserByEmail(users, req.body.username);
   if (!id) {
-    messageHandler.addLoginValidationError('No user with that email exists.');
+    messenger.addLoginValidationError('No user with that email exists.');
     res.status(403).render('pages/login', TEMPLATEVARS.login);
     return;
   }
   if (!bcrypt.compareSync(req.body.password, users[id].password)) {
-    messageHandler.addLoginValidationError('Incorrect login credentials.');
+    messenger.addLoginValidationError('Incorrect login credentials.');
     res.status(403).render('pages/login', TEMPLATEVARS.login);
     return;
   }
@@ -287,13 +296,13 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
 
   if (email === "" || username === "" || password === "") {
-    messageHandler.addRegistrationError('No blank fields allowed!');
+    messenger.addRegistrationError('No blank fields allowed!');
     res.status(400).render('pages/register', TEMPLATEVARS.register);
     return;
   }
   
   if (helper.emailExists(users, email)) {
-    messageHandler.addRegistrationError('Sorry, that email is taken!');
+    messenger.addRegistrationError('Sorry, that email is taken!');
     res.status(400).render('pages/register', TEMPLATEVARS.register);
     return;
   }
