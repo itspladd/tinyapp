@@ -27,17 +27,13 @@ const randInt = (min, max) => {
 // REQUIRES an object containing objects.
 const addToAll = (target, key, value) => {
   // Check for input existence
-  if (!target || !key || typeof target !== "object") {
+  if (!key) {
     return undefined;
   }
-
-  const nonObj = Object.values(target)
-    .filter(obj => typeof obj !== "object" || Array.isArray(obj));
-  if (nonObj.length !== 0) {
-    throw new Error(`Error: addToAll requires an input of an object that contains only other objects. Bad data: ${nonObj}`);
+  if (isObjectOfObjects(target)) {
+    Object.values(target).forEach(obj => obj[key] = value);
+    return true;
   }
-  Object.values(target).forEach(obj => obj[key] = value);
-  return true;
 };
 
 // Adds the input key and value to every object within the input object.
@@ -76,6 +72,22 @@ const urlsForUser = (id, urls) => {
   return Object.values(urls)
     .filter(url => url.userID === id);
 };
+
+// Check if the given input is an object containing other non-Array objects.
+const isObjectOfObjects = input => {
+  if (!input || typeof input !== "object") {
+    throw new Error(`No input, or input not an object: ${input}`);
+  }
+
+  const badValues = Object.values(input)
+    .filter(obj => typeof obj !== "object" || Array.isArray(obj));
+
+  if (badValues.length !== 0) {
+    throw new Error(`Error: Input contained non-object data. Bad data: ${badValues}`);
+  }
+
+  return true;
+}
 
 module.exports = {
   randomString,
