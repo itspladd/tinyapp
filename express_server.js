@@ -146,8 +146,10 @@ app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[shortURL].longURL;
   // If the retrieved longURL is undefined, go to the "url not found" page.
   if (!longURL) {
-    TEMPLATEVARS.bad_url['shortURL'] = shortURL;
-    res.render('pages/bad_url', TEMPLATEVARS.bad_url);
+    errorHandler.addError('bad_url',
+      `URL ${shortURL} not found!`,
+      () => res.redirect('/urls/not_found')
+    );
   } else {
     res.redirect(longURL);
   }
@@ -158,11 +160,12 @@ app.get('/urls', (req, res) => {
   if (!id) {
     errorHandler.addError('login',
       'Login to see your BabyURLs, or register an account to start creating them!',
-      () => res.redirect('login')
+      () => res.redirect('/login')
     );
+  } else {
+    TEMPLATEVARS.urls_index['urls'] = helper.urlsForUser(id, urlDatabase);
+    res.render('pages/urls_index', TEMPLATEVARS.urls_index);
   }
-  TEMPLATEVARS.urls_index['urls'] = helper.urlsForUser(id, urlDatabase);
-  res.render('pages/urls_index', TEMPLATEVARS.urls_index);
 });
 
 app.get('/urls/new', (req, res) => {
@@ -174,10 +177,27 @@ app.get('/urls/new', (req, res) => {
   }
 });
 
+app.get('/urls/not_found', (req, res) => {
+  res.render('pages/bad_url', TEMPLATEVARS.bad_url);
+})
+
 app.get('/urls/:shortURL', (req, res) => {
   // Get the short URL and long URL for this page
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
+  
+  const id = req.cookies['user_id'];
+  if (!id) {
+    errorHandler.addError('login',
+      'Login to see your URLs, or register an account to start creating them!',
+      () => res.redirect('/login')
+    );
+  } else if (urlDatabase[shortURL].userID !== id) {
+    errorHandler.addError('urls_index',
+      'You can only view URLs that belong to you!',
+      () => res.redirect('/urls')
+    );
+  }
 
   //Set both values in the templatevars for this page
   TEMPLATEVARS.urls_show['shortURL'] = shortURL;
@@ -194,27 +214,69 @@ app.get('/urls/:shortURL', (req, res) => {
  * Creates a new shortURL for a given longURL
  */
 app.post('/urls', (req, res) => {
-  const shortURL = helper.randomString();
-  const longURL = req.body.longURL;
   const userID = req.cookies['user_id'];
-  urlDatabase[shortURL] = { shortURL, longURL, userID };
-  res.redirect(`/urls/${shortURL}`);
+  if (!userID) {
+    errorHandler.addError('login',
+      'You have to log in to create a URL!',
+      () => res.redirect('/login')
+    );
+  } else {
+    const shortURL = helper.randomString();
+    const longURL = req.body.longURL;
+    urlDatabase[shortURL] = { shortURL, longURL, userID };
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
 /**
  * Updates an existing shortURL with a new longURL
  */
 app.post('/urls/:shortURL/update', (req, res) => {
+  const userID = req.cookies['user_id'];
   const shortURL = req.params.shortURL;
-  const longURL = req.body.longURL;
-  urlDatabase[shortURL].longURL = longURL;
-  res.redirect('/urls');
+  if (!userID) {
+    errorHandler.addError('login',
+      `You have to log in to update a URL!`,
+      () => res.redirect('/login')
+    );
+  } else if (!urlDatabase[shortURL]) {
+    // If the URL doesn't exist
+    errorHandler.addError('bad_url',
+    `URL ${shortURL} not found!`,
+    () => res.redirect('/login')
+  );
+  } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
+    // If the URL exists, but doesn't belong to this user
+    errorHandler.addError('login',
+      `You can't change other users' URLs!`,
+      () => res.redirect('/login')
+    );
+  } else {
+    const longURL = req.body.longURL;
+    urlDatabase[shortURL].longURL = longURL;
+    res.redirect('/urls');
+  }
+
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
+  const userID = req.cookies['user_id'];
+  if (!userID) {
+    errorHandler.addError('login',
+      `You have to log in to delete a URL!`,
+      () => res.redirect('/login')
+    );
+  } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
+    // If the URL exists, but doesn't belong to this user
+    errorHandler.addError('login',
+      `You can't delete other users' URLs!`,
+      () => res.redirect('/login')
+    );
+  } else {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  }
 });
 
 app.post('/login', (req, res) => {
@@ -237,7 +299,7 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   helper.addToAll(TEMPLATEVARS, 'user', '');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.post('/register', (req, res) => {
