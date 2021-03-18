@@ -208,7 +208,7 @@ app.post('/urls', (req, res) => {
 /**
  * Updates an existing shortURL with a new longURL
  */
-app.post('/urls/:shortURL/update', (req, res) => {
+app.post('/urls/:shortURL', (req, res) => {
   const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
