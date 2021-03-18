@@ -60,9 +60,25 @@ class MessageHandler {
     this.setRemovalFlag(false);
   }
 
+  addGenericLoginError(action) {
+    this.addError({ page: 'login', message: `You have to log in to ${action}!`});
+  }
+
+  addGenericPermissionsError(action) {
+    this.addError({ page: 'urls_index', message: `You can't ${action} URLs that don't belong to you!`});
+  }
+
+  addBadURLError(shortURL) {
+    this.TEMPLATEVARS.bad_url['shortURL'] = shortURL;
+    this.setErrorFlag(true);
+    this.setRemovalFlag(false);
+  }
+
   wipeErrors() {
     this.removeFromAny(this.TEMPLATEVARS, 'error');
     this.removeFromAny(this.TEMPLATEVARS, 'errorMsg');
+    delete this.TEMPLATEVARS.bad_url.shortURL;
+    
     this.setRemovalFlag(false);
     this.setErrorFlag(false);
   }
