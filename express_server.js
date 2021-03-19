@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
+const methodOverride = require('method-override');
 const bcrypt = require('bcrypt');
 
 const MessageHandler = require('./MessageHandler.js');
@@ -45,6 +46,7 @@ app.set('view engine', 'ejs');
 
 // Body parser
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(methodOverride('_method'));
 app.use(cookieSession({
   name: 'session',
   secret: '1by1sAgr3ml1n',
