@@ -51,18 +51,9 @@ app.use(cookieSession({
 }));
 
 // Custom middleware -
-// if we don't have a user set in templatevars,
-// and there's an ID cookie, AND we have that user in database,
-// set the user object in templatevars.
+// Add user to TEMPLATEVARS to keep pages up-to-date.
 app.use((req, res, next) => {
-  const userID = req.session.userID;
-  if (!TEMPLATEVARS.home['user'] && userID && users[userID]) {
-    const id = req.session.userID;
-    helper.addToAll(TEMPLATEVARS, 'user', users[id]);
-  } else if (!users[userID]) {
-    // If the current cookie's ID doesn't exist in our database, clear it.
-    req.session.userID = null;
-  }
+  helper.addToAll(TEMPLATEVARS, 'user', users[req.session.userID]);
   next();
 });
 
