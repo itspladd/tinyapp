@@ -4,7 +4,7 @@ A full-stack web application built with Node and Express. It allows users to sho
 
 ## Final Product
 
-### Users can create and view their short URLs, with handy buttons to launch the URL, edit it, or delete it.
+### Users can create and view their short URLs, with handy buttons to launch, edit, or delete each one.
 
 !["Screenshot of a user's list of short URLs"](https://github.com/itspladd/tinyapp/blob/main/docs/urls_page.png)
 *Should you visit these websites? Yes.*
@@ -19,15 +19,15 @@ A full-stack web application built with Node and Express. It allows users to sho
 !["Screenshot of the result if you try to access a nonexistent URL"](https://github.com/itspladd/tinyapp/blob/main/docs/bad_url.png)
 *This isn't the URL you're looking for.*
 
-### Users have to be logged in to create URLs. No free radical URLs cluttering up the database!
+### Users must be logged in to create URLs. No free radical URLs cluttering up the database!
 
 !["Screenshot of the message displayed if you try to create a new URL without being logged in"](https://github.com/itspladd/tinyapp/blob/main/docs/must_login.png)
-*Users only.*
+*Ey, memebers only, bub.*
 
 ### Similarly, only the URL's creator can delete or modify a TinyApp URL. Nobody else except you can delete the link to your third cousin's best friend's grandma's legendary peach cobbler recipe that's gathering cobwebs on their ancient Geocities page. (Although you *really* should consider moving that recipe somewhere more reliable.)
 
 !["Screenshot of the result if you try to access a URL created by a nother user"](https://github.com/itspladd/tinyapp/blob/main/docs/no_access.png)
-*Hands off.*
+*Hands. Off. The cobbler.*
 
 ## Dependencies
 
