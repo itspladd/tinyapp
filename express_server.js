@@ -69,7 +69,7 @@ app.use(messenger.checkFlags);
 /***********************************/
 
 /**************************/
-/** RENDERING *************/
+/** RENDERING/GET**********/
 /**************************/
 app.get('/', (req, res) => {
   if (req.session.userID) {
@@ -189,53 +189,6 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-/**
- * Updates an existing shortURL with a new longURL
- */
-app.post('/urls/:shortURL', (req, res) => {
-  const userID = req.session.userID;
-  const shortURL = req.params.shortURL;
-  if (!userID) {
-    messenger.addGenericLoginError('update a url');
-    res.status(401).render('pages/login', TEMPLATEVARS.login);
-    return;
-  }
-  if (!urlDatabase[shortURL]) {
-    messenger.addBadURLError(shortURL);
-    res.render('pages/bad_url', TEMPLATEVARS.bad_url);
-    return;
-  }
-  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
-    // If the URL exists, but doesn't belong to this user
-    messenger.addGenericPermissionsError('edit');
-    res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
-    return;
-  }
-
-  const longURL = req.body.longURL;
-  urlDatabase[shortURL].longURL = longURL;
-  res.redirect('/urls');
-});
-
-app.post('/urls/:shortURL/delete', (req, res) => {
-  const userID = req.session.userID;
-  const shortURL = req.params.shortURL;
-  if (!userID) {
-    messenger.addGenericLoginError('delete a URL');
-    res.status(401).render('pages/login', TEMPLATEVARS.login);
-    return;
-  }
-  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
-    // If the URL exists, but doesn't belong to this user
-    messenger.addGenericPermissionsError('delete');
-    res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
-    return;
-  }
-
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
-});
-
 app.post('/login', (req, res) => {
   const id = helper.lookupUserByEmail(users, req.body.username);
   if (!id) {
@@ -297,6 +250,60 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
+/**************************/
+/** PUT *******************/
+/**************************/
+
+/**
+ * Updates an existing shortURL with a new longURL
+ */
+ app.post('/urls/:shortURL', (req, res) => {
+  const userID = req.session.userID;
+  const shortURL = req.params.shortURL;
+  if (!userID) {
+    messenger.addGenericLoginError('update a url');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
+    return;
+  }
+  if (!urlDatabase[shortURL]) {
+    messenger.addBadURLError(shortURL);
+    res.render('pages/bad_url', TEMPLATEVARS.bad_url);
+    return;
+  }
+  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
+    // If the URL exists, but doesn't belong to this user
+    messenger.addGenericPermissionsError('edit');
+    res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
+    return;
+  }
+
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL].longURL = longURL;
+  res.redirect('/urls');
+});
+
+/**************************/
+/** DELETE ****************/
+/**************************/
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const userID = req.session.userID;
+  const shortURL = req.params.shortURL;
+  if (!userID) {
+    messenger.addGenericLoginError('delete a URL');
+    res.status(401).render('pages/login', TEMPLATEVARS.login);
+    return;
+  }
+  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
+    // If the URL exists, but doesn't belong to this user
+    messenger.addGenericPermissionsError('delete');
+    res.status(401).render('pages/urls_index', TEMPLATEVARS.urls_index);
+    return;
+  }
+
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
+});
 
 /***********************************/
 /** END OF ROUTING *****************/
