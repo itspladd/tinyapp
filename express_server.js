@@ -286,7 +286,7 @@ app.post('/register', (req, res) => {
 /** DELETE ****************/
 /**************************/
 
-app.post('/urls/:shortURL/delete', (req, res) => {
+app.delete('/urls/:shortURL', (req, res) => {
   const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
