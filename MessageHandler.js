@@ -8,13 +8,6 @@ class MessageHandler {
   * and checkFlags monitors the handler's status flags to see if
   * errors should be maintained or cleared.
   * 
-  * TODO: Messages created right before a res.redirect call are handled properly.
-  * However, messages created right before a res.render call aren't.
-  * If you create a message on a page, *render* that page, and then
-  * redirect to that same page or render it again, the error will still be there until
-  * the page loads again.
-  * 
-  * It should be fixed so that messages only display once before being cleared.
   */
   constructor(options) {
     /* The following lines aren't isn't great, I don't think - we're directly modifying TEMPLATEVARS
@@ -104,7 +97,6 @@ class MessageHandler {
   }
 
   setErrorFlag(value) {
-    console.log('Setting error flag to', value)
     this.errorMessageFlag = value;
   }
 
