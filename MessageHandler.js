@@ -1,12 +1,20 @@
 class MessageHandler {
   /*
   * A custom middleware message handler, to allow the site to pass
-  * messages and alerts to be displayed to a user.
+  * one-time messages and alerts to be displayed to a user.
   *
   * The handler is currently accessed via its addError and
   * checkFlags functions. addError adds an alert message to a page,
   * and checkFlags monitors the handler's status flags to see if
   * errors should be maintained or cleared.
+  * 
+  * TODO: Messages created right before a res.redirect call are handled properly.
+  * However, messages created right before a res.render call aren't.
+  * If you create a message on a page, *render* that page, and then
+  * redirect to that same page or render it again, the error will still be there until
+  * the page loads again.
+  * 
+  * It should be fixed so that messages only display once before being cleared.
   */
   constructor(options) {
     /* The following lines aren't isn't great, I don't think - we're directly modifying TEMPLATEVARS
@@ -19,6 +27,9 @@ class MessageHandler {
 
     this.errorMessageFlag = false;
     this.removeErrorsFlag = false;
+
+    // checkFlags is the function that actually runs as middleware.
+    // We have to bind it to 'this' so that app.use can grab and run it.
     this.checkFlags = this.checkFlagsUnbound.bind(this);
   }
 
@@ -35,9 +46,7 @@ class MessageHandler {
     // Next time we load a page, we'll remove the error so we don't see it again.
     if (this.errorMessageFlag) {
       this.setRemovalFlag(true);
-      this.setErrorFlag(false);
     }
-    
     next();
   }
 
@@ -95,6 +104,7 @@ class MessageHandler {
   }
 
   setErrorFlag(value) {
+    console.log('Setting error flag to', value)
     this.errorMessageFlag = value;
   }
 
