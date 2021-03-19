@@ -7,6 +7,9 @@
   <%- include('../partials/header') %>
   <main style="margin: 1em;">
     <h3>Create URL</h3>
+    <div class="alert alert-warning">
+      <strong>Note:</strong> Only fully-formed URLs will work! "http://www.google.com" works great, but "www.google.com" doesn't.
+    </div>
     <form class="form-inline" action="/urls" method="POST">
       <div class="form-group mb-2">
         <label for="longURL">Enter a URL:</label>
