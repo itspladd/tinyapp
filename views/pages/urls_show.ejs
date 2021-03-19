@@ -11,7 +11,7 @@
       <h5 class="card-title">TinyAPP URL for: <%= longURL %></h5>
       <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       <p class="card-text">
-        <form class="form-inline" action="/urls/<%= shortURL %>/update" method="POST">
+        <form class="form-inline" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
           <div class="form-group mb-2">
             <label for="longURL">Update this URL:</label>
             <input class="form-control" type="url" name="longURL" value=<%= longURL %> style="width: 300px; margin: 1em">

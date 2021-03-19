@@ -257,7 +257,7 @@ app.post('/register', (req, res) => {
 /**
  * Updates an existing shortURL with a new longURL
  */
- app.post('/urls/:shortURL', (req, res) => {
+ app.put('/urls/:shortURL', (req, res) => {
   const userID = req.session.userID;
   const shortURL = req.params.shortURL;
   if (!userID) {
