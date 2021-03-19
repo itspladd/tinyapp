@@ -67,33 +67,13 @@ app.use((req, res, next) => {
 });
 
 // Custom middleware: run MessageHandler to check for message flags
-/*
-TODO: Replace this with something like app.use(messenger.checkFlags).
-Currently that breaks, because 
-*/
 app.use(messenger.checkFlags);
-
 
 
 
 /***********************************/
 /** ROUTING ************************/
 /***********************************/
-
-/**************************/
-/** NON-RENDERING *********/
-/**************************/
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get('/users.json', (req, res) => {
-  res.json(users);
-});
-
-app.get('/templateVars.json', (req, res) => {
-  res.json(TEMPLATEVARS);
-});
 
 /**************************/
 /** RENDERING *************/
@@ -139,14 +119,14 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const id = req.session.userID;
-  if (!id) {
+  const userID = req.session.userID;
+  if (!userID) {
     messenger.addGenericLoginError('see your URLs');
     res.status(401).render('pages/login', TEMPLATEVARS.login);
     return;
   }
 
-  TEMPLATEVARS.urls_index['urls'] = helper.urlsForUser(id, urlDatabase);
+  TEMPLATEVARS.urls_index['urls'] = helper.urlsForUser(userID, urlDatabase);
   res.render('pages/urls_index', TEMPLATEVARS.urls_index);
 });
 
